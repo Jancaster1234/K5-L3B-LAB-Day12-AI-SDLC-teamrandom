@@ -203,9 +203,17 @@ function drawGather(w, h) {
     for (let i = 0; i < cap; i++) {
       const x0 = 14 + i * (sz + 4);
       ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.fillRect(x0, y0, sz, sz);
-      if (snap.hold[i]) { ctx.fillStyle = kc(snap.hold[i]); ctx.fillRect(x0 + 3, y0 + 3, sz - 6, sz - 6); }
+      const it = snap.hold[i];
+      if (it) {
+        const kind = typeof it === "string" ? it : it.kind, fr = typeof it === "string" ? 100 : it.fresh;
+        ctx.fillStyle = kc(kind); ctx.fillRect(x0 + 3, y0 + 3, sz - 6, sz - 6);
+        // v1.2: thanh độ tươi dưới ô; ươn (< 30) thì gạch chéo đỏ
+        ctx.fillStyle = fr < 30 ? "#ef5350" : fr < 60 ? "#ffca28" : "#66bb6a";
+        ctx.fillRect(x0 + 3, y0 + sz - 5, Math.max(1, (sz - 6) * fr / 100), 3);
+        if (fr < 30) { ctx.strokeStyle = "#ef5350"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0 + 3, y0 + 3); ctx.lineTo(x0 + sz - 3, y0 + sz - 3); ctx.stroke(); }
+      }
     }
-    const names = {}; snap.hold.forEach((k) => (names[k] = (names[k] || 0) + 1));
+    const names = {}; snap.hold.forEach((e) => { const k = typeof e === "string" ? e : e.kind; names[k] = (names[k] || 0) + 1; });
     text("Giỏ " + snap.hold.length + "/" + cap + "  " + Object.keys(names).map((k) => (KIND_NAME[k] || k) + "×" + names[k]).join(", "), 14, y0 + sz + 16, { size: 12, color: "#cfd8dc" });
   }
   text("WASD/mũi tên bơi · E hái / cập bến · Space bắt cá · R chơi lại", w - 10, h - 14, { size: 12, align: "right", color: "#9fb3c0" });
@@ -261,7 +269,11 @@ function drawQuan(w, h) {
   // HUD
   text("⏱ " + fmtTime(snap.time_left_ticks), 14, 28, { size: 20 });
   text(`Tiền ${snap.money ?? 0}k · uy tín ${(snap.reputation ?? 0).toFixed(1)} · điểm ${snap.score ?? 0}`, 110, 28, { size: 16 });
-  const stock = snap.stock ? Object.keys(snap.stock).map((k) => (KIND_NAME[k] || k) + "×" + snap.stock[k]).join(", ") : "";
+  // v1.2: kho là mảng cá thể {id, kind, fresh}; hiện số lượng theo loại, độ tươi thấp nhất và số hàng ươn
+  const groups = {};
+  (Array.isArray(snap.stock) ? snap.stock : Object.keys(snap.stock || {}).flatMap((k) => Array(snap.stock[k]).fill({ kind: k, fresh: 100 })))
+    .forEach((e) => { const g = (groups[e.kind] = groups[e.kind] || { n: 0, min: 100, bad: 0 }); g.n++; g.min = Math.min(g.min, e.fresh); if (e.fresh < 30) g.bad++; });
+  const stock = Object.keys(groups).sort().map((k) => { const g = groups[k]; return (KIND_NAME[k] || k) + "×" + g.n + " (tươi ≥" + Math.floor(g.min) + (g.bad ? ", ươn " + g.bad : "") + ")"; }).join(", ");
   text("Kho: " + (stock || "(trống)"), 14, 52, { size: 13, color: "#cfd8dc" });
   text("WASD/mũi tên đi · E tương tác (bếp / bàn) · R chơi lại", w - 10, h - 14, { size: 12, align: "right", color: "#9fb3c0" });
 }
