@@ -30,3 +30,6 @@
 ## Skills / hooks của nhóm
 - [run-phase-qa](.agents/skills/run-phase-qa/SKILL.md): chạy suite trước tích hợp/tag, lưu exit code và log thật, phân biệt lỗi Windows với lỗi luật.
 - [verify-phase-proof](.agents/skills/verify-phase-proof/SKILL.md): chạy lại fixture lát 1, so byte với bằng chứng gốc và hai lần cùng seed, cập nhật link verification và giả định chờ PO.
+- Windows trước QA/demo: `$env:PYTHONUTF8 = '1'; $env:PYTHONIOENCODING = 'utf-8'; $env:PYTHONPATH = 'tests;.'`, rồi `powershell -ExecutionPolicy Bypass -File .\lab.ps1 test`. UTF-8 áp dụng cả khi đọc stdout/stderr của tiến trình con; riêng `PYTHONIOENCODING` chưa đủ.
+- Phạm vi proof: `replay_lat1.py` phục vụ bộ bằng chứng v1.0 trên checkout `39fc6fd`. Không dùng kết quả so blob v1.0 để kết luận hồi quy trên v1.2 (schema kho đã đổi). Với code hiện tại chạy toàn suite, đặc biệt `tests/test_fresh.py` và `tests/test_quan_integration.py`; đọc phiên bản contract/clarify mới nhất trước khi dùng hướng dẫn lịch sử trong skill.
+- Phase 4: [checklist demo và lệnh PowerShell](docs/demo.md). Chỉ đánh dấu bước đã chạy, ghi rõ phần UI/soak còn thiếu; Integrator gộp nhánh và gắn tag.
