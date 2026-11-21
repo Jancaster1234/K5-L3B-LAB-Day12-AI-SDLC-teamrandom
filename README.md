@@ -1,5 +1,56 @@
 # Day 12 — AI SDLC: Quán Ăn Chợ Nổi
 
+## Cách chạy (teamrandom)
+
+### Chạy từ clone sạch (tối đa 3 lệnh trên macOS/Linux)
+```bash
+git clone https://github.com/Jancaster1234/K5-L3B-LAB-Day12-AI-SDLC-teamrandom.git
+cd K5-L3B-LAB-Day12-AI-SDLC-teamrandom
+python3 -m chonoi.live --mode gather
+```
+* **Yêu cầu môi trường:** Python 3.10+, không cần cài thêm (chỉ dùng thư viện chuẩn Python).
+* **Các chế độ chơi live khác:**
+  - Ca quán: `python3 -m chonoi.live --mode quan`
+  - Cả ngày: `python3 -m chonoi.live --mode day`
+
+### Điều khiển
+* **Di chuyển:** `WASD` hoặc các phím mũi tên.
+* **Tương tác:** `E` (hái cây, bỏ nguyên liệu vào bếp, lấy món chín, phục vụ bàn).
+* **Bắt cá:** `Space` (khi tiếp cận gần cá).
+* **Tạm dừng / Tiếp tục:** `Esc` hoặc `P`.
+
+### Công thức tính điểm
+$$\text{điểm} = \text{earned} + 100 \times \lfloor\text{reputation}\rfloor$$
+(hoặc: `điểm = earned + 100 × floor(reputation)`).
+
+### Lệnh chạy test
+```bash
+PYTHONPATH=tests:. python3 -m unittest discover -s tests -v
+```
+
+### Chế độ Headless (Mô phỏng tất định)
+```bash
+python3 -m chonoi.headless --mode gather|quan|day --seed 1 --ticks 600 --out out.jsonl
+```
+*(Thêm `--days 1..5` khi chạy ở chế độ `--mode day`, ví dụ `--days 2`)*.
+
+### Chạy Benchmark hiệu năng
+```bash
+python3 -m chonoi.bench --seed 42 --duration 30 --out bench.json
+```
+
+### Chạy Soak test độ ổn định dài hạn
+```bash
+python3 -m chonoi.soak --seed 7 --days 10 --out soak.json
+```
+
+## Mở rộng đã làm
+* **`burn`:** Món nấu chín trên bếp nếu để quá 20 giây (tương đương 1200 tick) mà người chơi không lấy ra thì món sẽ bị cháy hỏng (`dish_burnt`), bếp trở về trạng thái rảnh `idle`, đơn của khách nếu kho còn nguyên liệu sẽ được giữ chỗ lại (`reserved`), nếu thiếu sẽ chuyển sang `unfulfillable` khách vẫn tiếp tục chờ.
+  * Bộ test kiểm chứng: `tests/test_ext_burn.py`.
+
+## Sáng tạo của nhóm
+* **Chưa có:** Nhóm tập trung tối đa nguồn lực vào việc hoàn thiện chính xác 100% hợp đồng kỹ thuật (PRD-0, Test Contract v1.0, v1.1, v1.2), bảo đảm tính tất định và tối ưu hiệu năng/độ ổn định qua toàn bộ các Phase.
+
 > **Làm theo nhóm 4–6 người** · Dùng AI để xây game 2D qua **4 phase** trong **3 giờ**: Út Sen lặn bắt cá, hái rau trên mặt nước rồi tối mở quán phục vụ khách.
 > **Yêu cầu từng phase mở đúng mốc giờ tại lab board:** **[Chợ Nổi Lab](https://claude.ai/artifact/E35v787wSx2wDgPTNhMVDg)** (cần đăng nhập claude.ai; có trợ giảng AI cho từng phase).
 
