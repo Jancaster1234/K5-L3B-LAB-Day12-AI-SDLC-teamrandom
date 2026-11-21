@@ -6,4 +6,6 @@
 | 2 | 2026-11-21 P1 | Giỏ còn ít chỗ hơn số thu được (vd. `ca_linh` cho 3 mà còn 2 chỗ): thêm một phần hay từ chối cả lượt? | Chưa chốt | PO |
 | 3 | 2026-11-21 P1 | Thứ tự trong bước quan: kiên nhẫn → bếp → ăn → đi → interact → khách mới có đúng PRD-0 mục F? | Giả định như contract mục 2 | PO |
 | 4 | 2026-11-21 P1 | Trạng thái khách ngoài `waiting`/`eating` (vd. `assigned`)? `hand` là chuỗi id món hay object? | Giả định `waiting`/`eating`, `hand` = chuỗi | PO |
+| 6 | 2026-11-21 P1 | Bước oxy vừa về 0 có tính là bước ngạt đầu tiên không? (ảnh hưởng tick `choke`: k + 59 hay k + 60) | Giả định CÓ tính: oxy về 0 ở tick k → `choke` ở tick k + `choke_interval_ticks` − 1 (`tests/test_gather_lat1.py`) | PO |
+| 7 | 2026-11-21 P1 | Cùng bước vừa ngất vừa bấm `interact` trong vùng bến: `fainted` hay `docked`? | Giả định `fainted` (xét oxy/Máu trước interact, theo TODO trong khung) | PO |
 | 5 | 2026-11-21 P1 | Tiền boa làm tròn thế nào (`tip_rate * price`)? Kiên nhẫn so với `tip_min_patience_ratio` tính lúc `served` hay lúc `paid`? | Giả định tính lúc `served` | PO |
