@@ -1,0 +1,146 @@
+# Python 3.12.0 â€” regression P1 + P2 trÃªn sá»‘ chuáº©n v1.1
+# PYTHONPATH="tests;." python3 -m unittest discover -s tests -v
+test_cap_ben_mo_quan_voi_kho_ban_giao ... ok
+test_khach_chi_goi_mon_trong_ke_hoach ... ok
+test_mot_ngay_tron_ven ... ok
+test_hai_ngay_giong_tung_byte ... D:\code\projects\ai20k\labs\K5-L3B-LAB-Day12-AI-SDLC-teamrandom\tests\test_day.py:180: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\THINKP~1\\AppData\\Local\\Temp\\tmp2r36uoz5\\d.jsonl' mode='r' encoding='utf-8'>
+  outs.append(open(w.path("d.jsonl"), encoding="utf-8").read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+D:\code\projects\ai20k\labs\K5-L3B-LAB-Day12-AI-SDLC-teamrandom\tests\test_day.py:180: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\THINKP~1\\AppData\\Local\\Temp\\tmpzag48ap3\\d.jsonl' mode='r' encoding='utf-8'>
+  outs.append(open(w.path("d.jsonl"), encoding="utf-8").read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_tham_so_va_scenario_sai ... ok
+test_pause_dung_moi_timer ... ok
+test_pause_o_mode_gather ... ok
+test_cap_vua_mua_chua_hieu_luc_trong_shop ... ok
+test_da_toi_da ... ok
+test_mua_nang_cap_va_hieu_luc_tu_ngay_ke ... ok
+test_ngay_3_co_m2 ... ok
+test_du_chu_ky_thi_tru_mau ... ok
+test_moc_thoi_gian_choke_tu_luc_het_oxy ... ok
+test_noi_len_reset_dem_ngat ... ok
+test_cung_dau_vao_cung_ket_qua ... ok
+test_mau_ve_0_thi_ngat_mat_gio ... ok
+test_ngat_ghi_kho_rong ... ok
+test_ngat_xet_truoc_cap_ben ... ok
+test_duoi_nuoc_tru_1_moi_tick ... ok
+test_mat_nuoc_hoi_oxy_va_kep_tran ... ok
+test_oxygen_empty_dung_mot_lan ... ok
+test_dive_khi_xuong_duoi_mat_nuoc ... ok
+test_dung_yen_khong_phat_dive_surface ... ok
+test_bat_ca_duoi_nuoc ... ok
+test_ca_nhieu_hon_cho_trong_tu_choi_ca_luot ... ok
+test_gio_day_ca_o_lai ... ok
+test_hoi_chieu ... ok
+test_ngoai_ban_kinh_khong_bat ... ok
+test_o_mat_nuoc_khong_bat ... ok
+test_vung_hut_khong_hoi_chieu ... ok
+test_ben_xet_truoc_hai ... ok
+test_chon_nut_gan_nhat_hoa_thi_id_nho ... ok
+test_duoi_nuoc_khong_hai ... ok
+test_gio_day_hold_full_nut_giu_nguyen ... ok
+test_gio_lifo_va_kho_khi_cap_ben ... ok
+test_hai_nut_o_mat_nuoc ... ok
+test_ngoai_ban_kinh_khong_hai ... ok
+test_nut_chua_moc_khong_hai_moc_xong_thi_hai ... ok
+test_bat_tu_thi_khong_hit ... ok
+test_cham_mat_mau_rot_hang_lifo_bat_tu_recoil ... ok
+test_gather_doc_lap_dung_bo_tri_ngay_1 ... ok
+test_mau_ve_0_do_quai_thi_ngat ... ok
+test_nguoi_choi_nong_khong_bi_phat_hien ... ok
+test_phat_hien_thi_duoi_3_m_s ... ok
+test_recoil_lui_2_m_trong_60_buoc_roi_ve_patrol ... ok
+test_snapshot_co_monsters ... ok
+test_tuan_tra_1_m_s_toi_waypoint ... ok
+test_khong_sinh_khi_dat_tran ... ok
+test_sinh_mot_dan_tai_phase_tick_360 ... ok
+test_tat_dinh_cung_seed ... ok
+test_ca_boi_dung_toc_do ... ok
+test_ca_fixture_dung_yen_khi_tat_random_fish ... ok
+test_ca_o_trong_dai_do_sau_cua_loai ... ok
+test_doi_huong_o_buoc_boi_thu_120 ... ok
+test_phan_xa_o_mep_x ... ok
+test_monster_sai_thi_ma_2 ... ok
+test_state_input_and_clean_stop ... ok
+test_bad_frames_raise ... ok
+test_id_allocator_continues_after_max ... ok
+test_id_sorting ... ok
+test_input_edges_and_inherit ... ok
+test_live_inputs_keep_fast_tap_edge ... ok
+test_session_steps_gather_and_dock ... ok
+test_v11_buttons_and_buy ... ok
+test_cung_dau_vao_cung_ket_qua ... ok
+test_khach_lat3_duoc_lat4_phuc_vu_va_tra_tien ... ok
+test_giam_kien_nhan_moi_tick_va_bo_di_khi_ve_0 ... ok
+test_khach_cu_bo_di_nha_ban_va_kho_kip_cho_khach_moi_cung_tick ... ok
+test_khach_eating_khong_bi_tru_kien_nhan ... ok
+test_uy_tin_kep_khong_am_khi_nhieu_khach_bo_di ... ok
+test_headless_tat_dinh_cung_seed ... ok
+test_khach_waiting_giu_cho_qua_kho_exit_2 ... ok
+test_khach_waiting_hop_le_khi_mon_da_o_tren_bep_hoac_tay ... ok
+test_giu_cho_lam_khach_sau_het_mon_phat_no_dish ... ok
+test_het_ban_trong_khong_sinh_them_va_khong_phat_no_dish ... ok
+test_khach_den_dung_first_customer_tick_va_giu_cho ... ok
+test_khong_du_nguyen_lieu_phat_no_dish ... ok
+test_random_customers_false_tat_sinh_khach_theo_lich ... ok
+test_carry_limit_cannot_pick_second_dish
+\u0110ang c\u1ea7m món trong tay thì không th\u1ec3 b\u1ed1c thêm món t\u1eeb b\u1ebfp. ... ok
+test_interact_tie_break_stove_before_table
+N\u1ebfu b\u1ebfp và bàn cùng kho\u1ea3ng cách, b\u1ebfp \u0111\u01b0\u1ee3c \u01b0u tiên tr\u01b0\u1edbc bàn. ... ok
+test_quan_end_when_time_up
+H\u1ebft gi\u1edd thì bu\u1ed5i m\u1edf quán k\u1ebft thúc v\u1edbi \u0111\u1ea7y \u0111\u1ee7 thông s\u1ed1. ... ok
+test_serve_eating_and_paid_no_tip
+Ph\u1ee5c v\u1ee5 khách kiên nh\u1eabn th\u1ea5p: \u0103n xong tr\u1ea3 ti\u1ec1n nh\u01b0ng không có boa, uy tín gi\u1eef nguyên. ... ok
+test_serve_eating_and_paid_with_tip
+Ph\u1ee5c v\u1ee5 khách kiên nh\u1eabn cao: \u0103n xong tr\u1ea3 ti\u1ec1n + boa 20% + t\u0103ng 0.2 uy tín. ... ok
+test_stove_cooking_ready_and_pick
+Ki\u1ec3m tra quy trình b\u1ebfp: n\u1ea5u -> chín (dish_ready) -> b\u1ed1c món (dish_picked). ... ok
+test_het_ca_khach_cho_roi_closing_khong_tru_uy_tin ... ok
+test_het_ca_khach_dang_an_tra_tien_closing_roi_quan_end ... ok
+test_het_ca_khong_sinh_khach_moi ... ok
+test_items_la_mang_kind_sap_theo_kind ... ok
+test_snapshot_player_quan_co_pos_va_vel ... ok
+test_boa_dung_floor ... ok
+test_doi_tuong_gan_nhat_khong_dung_duoc_thi_bo_luot ... ok
+test_nau_dung_phan_giu_cho_cua_don ... ok
+test_phuc_vu_dung_tick_kien_nhan_ve_0_van_hop_le ... ok
+test_het_kien_nhan_huy_mon_tren_bep ... ok
+test_het_kien_nhan_huy_mon_tren_tay ... ok
+test_don_unfulfillable_hop_le ... ok
+test_mau_thuan_scenario_ma_2 ... ok
+test_khach_moi_co_order_tick_va_order_status ... ok
+test_ready_ticks_chi_tang_cho_mon_da_ready_tu_dau_buoc ... ok
+test_con_01_ticks_zero_and_end_line ... ok
+test_con_02_deterministic_bytes ... ok
+test_con_03_bad_input_exit_2 ... ok
+test_con_03_old_and_future_modes_rejected ... ok
+test_gather_snapshot_has_gather_fields ... ok
+test_scenario_out_of_domain_exit_2 ... ok
+test_inv_01_gather_writes_inventory_quan_reads_it
+Ví d\u1ee5 smoke test trong PRD-0 m\u1ee5c G: c\u1eadp b\u1ebfn \u1edf tick 0, quán \u0111\u1ecdc kho \u0111úng n\u1ed9i dung. ... ok
+test_inv_01_not_written_when_tick_limit_first ... ok
+test_inv_bad_schema_exit_2 ... ok
+test_inventory_and_scenario_stock_conflict ... ok
+test_inventory_flags_mode_mismatch_exit_2 ... ok
+test_move_01_swim_speed_after_ramp
+B\u1ecf 6 tick t\u0103ng t\u1ed1c r\u1ed3i \u0111o 60 tick: quãng \u2248 swim_speed × 1 s. Ngang, xu\u1ed1ng, chéo (không nhanh h\u01a1n). ... ok
+test_move_02_heading_positive_is_down ... ok
+test_move_03_edge_clamp
+Ch\u1eb7n t\u1eebng mép c\u1ee7a vùng n\u01b0\u1edbc, k\u1ec3 c\u1ea3 d không âm và \u0111áy d = 30. ... ok
+test_move_mep_vel_ve_0 ... ok
+test_move_ramp_doi_huong_trong_tran
+\u0110\u1ea3o t\u1eeb +speed sang -speed: v\u1eadn t\u1ed1c ch\u1ea1m m\u1ee5c tiêu sau t\u1ed1i \u0111a ramp_max_ticks tick k\u1ec3 t\u1eeb lúc \u0111\u1ed5i input. ... ok
+test_time_ends_gather_and_keeps_hold ... ok
+test_khoi_sai_mode_exit_2 ... ok
+test_quan_fixture_khong_hop_le_exit_2 ... ok
+test_quan_player_vel_hop_le ... ok
+test_good ... ok
+test_template_is_rejected ... ok
+test_too_few_members ... ok
+test_wrong_size_duplicate_and_outsider ... ok
+
+----------------------------------------------------------------------
+Ran 123 tests in Xs
+
+OK
