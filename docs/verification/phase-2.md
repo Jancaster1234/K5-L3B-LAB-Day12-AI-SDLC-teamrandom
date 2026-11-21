@@ -13,8 +13,9 @@
 | AC-P2-09 — Smoke tích hợp có bằng chứng | `gather --inventory-out` → `quan --inventory`, so `stock` tick 0 | [integration-*](../proof/phase-2/README.md) | Đạt |
 | AC-P2-10 — Regression P1 đạt với số chuẩn, test đổi có lý do | Toàn suite; lý do đổi test trong commit `3f4dd66`, `d7cdf6d` | [Log 123 test](../proof/phase-2/test-output.txt) | Đạt |
 | AC-P2-11 — Mở rộng (nhóm 5 người ≥ 1) có test | `burn`: 4 test | [tests/test_ext_burn.py](../../tests/test_ext_burn.py) | Đạt |
-| AC-P2-12 — Ghi chép làm rõ, nhật ký AI, retro | `docs/clarify.md`, `docs/ai-usage-log.md`, `docs/retro.md` | — | Một phần (retro P2 chờ Quang Hải) |
+| AC-P2-12 — Ghi chép làm rõ, nhật ký AI, retro | `docs/clarify.md`, `docs/ai-usage-log.md`, `docs/retro.md` | — | Một phần tại tag `phase-2` (retro P2 chờ Quang Hải). *Cập nhật P4:* retro P2 đã có trong [retro.md](../retro.md) (Quang Hải, nhánh `haivq-p4-docs`) |
 
 ## Đánh giá ngắn
 - Lõi Test Contract v1.1 đạt trên test tự động (127 test kể cả `burn`). Chưa đạt: menu/intro/Shop/HUD trên cửa sổ chơi.
+- *Cập nhật sau (P4 / v1.1.0, không đổi kết quả tại tag `phase-2`):* cửa sổ chơi đã có pause, Shop đồ họa, HUD, 3 cảnh báo ([ảnh](../proof/phase-4/ui/README.md)); vẫn chưa có menu chính / DayIntro / Summary.
 - Tag `phase-2` gắn trễ so với mốc 1:55 (nhóm làm lại Phase 1 theo PRD-0 trước); ghi trung thực.

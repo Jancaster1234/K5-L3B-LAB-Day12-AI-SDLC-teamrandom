@@ -25,7 +25,7 @@
 
 ## Phase 4 (Retro cuối lab)
 - **Rà lại hành động của retro P2:**
-  - **Đã làm gì:** `Jancaster1234` đã lập [ADR-0001](../adr/0001-kho-ca-the-v12.md) ghi rõ bảng tác động và thứ tự tích hợp trước khi đổi schema kho v1.2, giữ `main` chạy được ở v1.1 tới khi gộp (`369737b`, `4c78cee`), đạt 140/140 test xanh ở Phase 3 (`AC-P3-05`, `AC-P3-06`).
+  - **Đã làm gì:** `Jancaster1234` đã lập [ADR-0001](adr/0001-kho-ca-the-v12.md) ghi rõ bảng tác động và thứ tự tích hợp trước khi đổi schema kho v1.2, giữ `main` chạy được ở v1.1 tới khi gộp (`369737b`, `4c78cee`), đạt 140/140 test xanh ở Phase 3 (`AC-P3-05`, `AC-P3-06`).
   - **Còn vướng gì, vì sao:** Tag `phase-3` vẫn gắn trễ so với mốc 2:30 do phải chuyển đổi 37 test cũ sang schema kho cá thể mới; đồng thời `chonoi.live` vẫn chưa có menu/intro/Shop trên cửa sổ chơi (`AC-P2-08`) và nhóm chưa làm mở rộng P3 (`AC-P3-07`) vì ưu tiên lõi Test Contract.
 - **Điều tốt / điều tệ:**
   - Tốt: Tách ranh giới file rõ ràng ở Phase 4 (`docs/plan/lab-plan.md`) — `chonoi/bench.py` cho `ndhai255`, `docs/verification/phase-4.md` + `docs/retro.md` cho `HaiVuQ`, `README.md`/release notes cho `hoangngochieu10012000`, `AGENTS.md`/`docs/demo.md`/QA cho `tuannguyen-cell` — tránh xung đột khi tích hợp.
