@@ -101,3 +101,14 @@ Dòng JSONL: `{"type":"event","tick","phase","name","data"}`; phát theo đúng 
 - Ngẫu nhiên chỉ qua `self.rng` (`Streams`); không `random`, không đồng hồ hệ thống.
 - Duyệt/sắp thực thể bằng `sort_by_id`; id mới bằng `IdAllocator.new(prefix)`.
 - Tie-break mọi lựa chọn gần nhất: khoảng cách → (bếp trước bàn) → id nhỏ.
+
+## 6. Test Contract v1.1 (Phase 2, Ticket-02) — đã chạy trên code
+
+- **Manifest:** `contract_version: "1.1"`, số chuẩn Ticket-02 mục 1; `extensions: ["burn"]` (`quan.burn_s: 20`).
+- **CLI:** `--mode gather|quan|day`, `--days 1..5` (chỉ với `day`). Cờ file kho chỉ cho hai mode độc lập.
+- **Inputs:** nút `interact`, `catch`, `pause`, `shop_done`, `attack`, `photo` (hai nút cuối nhận nhưng bỏ qua vì chưa bật mở rộng); `buy` là chuỗi, chỉ ở frame khai báo.
+- **Pause** (runner, cả ba mode): cạnh `pause` xét trước; vào pause chỉ tăng `tick` ngoài, phát `paused`; `sim_tick`, `phase_tick`, timer đứng yên; cạnh kế phát `resumed` và chạy gameplay ngay bước đó. Snapshot `state: "paused"`.
+- **Gather:** thứ tự `đồng hồ → bơi/oxy/ngạt → quái + tối đa 1 hit → tương tác → bắt cá (vị trí cá trước khi bơi) → hết giờ → (còn giờ) cá bơi, sinh`. Snapshot thêm `monsters[] {id,kind,pos,waypoints,target_idx,state,state_ticks_left,recoil_dir}`, `fish[].age_ticks`, `player.invuln_ticks`. Event mới `monster_hit {monster_id,hp,lost,pos}`, `fish_spawned {id,kind,pos}`, `faint {cause:"monster"|"choke",lost,hp:0}`.
+- **Day** (`chonoi/sim/day.py`): `day_start → day_plan → phase_start(gather)`; `gather_end` + `phase_start(quan)` cùng tick; `quan_end` + `phase_start(shop)` cùng tick; `shop_end {reason: done|time}` rồi dựng Ngày kế cùng tick. Snapshot mọi pha thêm `day, day_plan, upgrades, active_upgrades`; Shop có `stock` dư và `time_left_ticks`. Vỏ event có `day`. End thêm `days_completed`, `reason: "days_complete"`.
+- **Shop:** `buy` xử lý trước cạnh `shop_done`; `bought {upgrade,level,price,money}`, `buy_failed {action,reason: funds|max_level|unknown}`; tự đóng sau `shop.max_ticks` (600). Cấp vừa mua có hiệu lực từ Ngày kế.
+- **Mở rộng burn:** `ready_ticks > burn_s×60` → `dish_burnt {stove_id,order_id,dish_id,order_status}`, giữ lại ngay cho đơn (reserved / unfulfillable).
