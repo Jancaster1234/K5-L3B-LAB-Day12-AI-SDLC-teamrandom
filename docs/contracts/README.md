@@ -35,16 +35,17 @@ Giỏ (`self.hold`): mảng id theo thứ tự nhặt, **cuối mảng = mới n
 |---|---|---|---|
 | 1 | Đồng hồ | có sẵn | khung |
 | 2 | Giảm kiên nhẫn khách `waiting`; về 0 → `customer_left`, nhả giữ chỗ, uy tín `+= left_reputation_delta` | `_tick_patience(events)` | lát 3 · HaiVuQ |
-| 3 | Bếp nấu: `cook_ticks_left` −1; về 0 → `ready`, `dish_ready` | `_tick_stoves(events)` | lát 4 · hoangngochieu10012000 |
+| 3 | Bếp nấu: `cook_ticks_left` −1; về 0 → `ready`, `dish_ready` | `_tick_stoves(events)` | lát 4 · Hiệu |
 | 4 | Khách ăn: `eat_ticks_left` −1; về 0 → `paid` (tiền + boa, uy tín), rời bàn | `_tick_eating(events)` | lát 4 |
 | 5 | Đi lại + chặn biên | `_move` | khung |
 | 6 | Tối đa **một** interact; chọn đối tượng gần nhất trong `interact_radius`, hòa thì **bếp trước bàn**, rồi id nhỏ | `_interact(events)` | lát 4 |
 | 7 | Khách mới theo lịch (`first_customer_tick`, rồi mỗi `customer_interval_s`), chọn món nấu được, giữ chỗ; không món nào → `no_dish` | `_spawn_customers(events)` | lát 3 |
 | 8 | Hết giờ → `quan_end` | có sẵn | khung |
 
-⚠ PRD-0 mục F: thứ tự bước 2–4 và 6–7. Nếu PRD-0 khác, chỉ đổi thứ tự dòng gọi, không đổi hàm.
+**Chốt khi tích hợp (Integrator, clarify #3):** kiên nhẫn → bếp → ăn → đi → interact → khách mới, theo gợi ý `TODO` của khung ("giảm kiên nhẫn / nấu / ăn"). ⚠ PRD-0 mục F: nếu khác, chỉ đổi thứ tự dòng gọi, không đổi hàm.
 
-Hàm dùng chung do lát 3 viết, lát 4 gọi: `_available() -> dict` (kho − tổng giữ chỗ), `_release(customer)` (nhả giữ chỗ).
+Hàm dùng chung do lát 3 viết, lát 4 gọi: `_available() -> dict` (kho − tổng giữ chỗ), `_release(customer)` (nhả giữ chỗ), `_cookable_dishes()`.
+Bếp idle chọn món (`_dish_to_cook`): (1) khách chờ còn giữ chỗ đủ công thức → nấu bằng phần giữ chỗ đó; (2) khách chờ mà số món đang nấu/bưng chưa đủ → nấu bằng kho khả dụng; (3) không ai cần → món đầu tiên nấu được. **Không bao giờ lấy nguyên liệu đang giữ cho khách khác.** Nấu: trừ `stock` theo công thức, nhả `reserved` của khách đó.
 
 ## 3. Trạng thái (snapshot) — UI chỉ đọc, không ghi
 
@@ -62,11 +63,13 @@ Bếp (khung đã cố định): `{id, pos, state: "idle"|"cooking"|"ready", dis
 | `id` | `"C1"`, `"C2"`… cấp bằng `self.ids.new("C")` | lát 3 |
 | `table_id` | id bàn | lát 3 |
 | `dish_id` | khóa trong `tuning.menu` | lát 3 |
-| `state` | `"waiting"` → `"eating"` (⚠ PRD-0: có thêm trạng thái như `assigned`?) | lát 3 tạo, lát 4 chuyển |
-| `patience_ticks_left` | `patience_s * 60` lúc đến | lát 3 |
+| `dish` | bí danh của `dish_id` (giữ cho tương thích) | lát 3 |
+| `state` | `"waiting"` → `"eating"`; nạp scenario chấp nhận thêm `"assigned"` (món đã nấu/bưng sẵn), xử lý như `waiting` (⚠ PRD-0) | lát 3 tạo, lát 4 chuyển |
+| `patience_ticks_left`, `patience_ticks_total` | cả hai = `patience_s * 60` lúc đến; tỉ lệ `left/total` dùng xét boa | lát 3 |
 | `reserved` | `{nguyên liệu: số}` theo `recipe` | lát 3 giữ, lát 4 tiêu khi `cook_started` |
 | `eat_ticks_left` | `eat_s * 60` khi `served` | lát 4 |
-| `price`, `tip` | chốt khi `served` (tip theo `tip_rate`, chỉ khi kiên nhẫn còn ≥ `tip_min_patience_ratio`) | lát 4 |
+| `tipped` | chốt khi `served`: `left/total ≥ tip_min_patience_ratio` | lát 4 |
+| `price`, `tip` (tùy chọn, scenario) | nếu có thì dùng thay cho `menu.price` và `round(price * tip_rate)` khi `paid` | lát 4 |
 
 `hand`: `null` hoặc id món đang bưng (chuỗi), tối đa `carry_limit`. ⚠ PRD-0.
 
@@ -94,10 +97,12 @@ Dòng JSONL: `{"type":"event","tick","phase","name","data"}`; phát theo đúng 
 | `dish_ready` | lát 4 | `{stove_id, dish_id}` |
 | `dish_picked` | lát 4 | `{stove_id, dish_id}` |
 | `served` | lát 4 | `{customer_id, table_id, dish_id}` |
-| `paid` | lát 4 | `{customer_id, price, tip}` |
+| `paid` | lát 4 | `{customer_id, table_id, dish_id, price, tip, amount}` (`amount = price + tip`) |
 | `quan_end` | khung | `{reason, money, earned, shift_earned, reputation}` ✅ |
 
 ✅ = khung đã cố định. Người nghe: runner (ghi JSONL), UI (`chonoi.live` hiện 6 sự kiện cuối), QA (test).
+
+Mọi sự kiện có món dùng **`dish_id`** (không dùng `dish`), khớp trường khách và UI. Bản `docs/contracts/quan.md` (lát 4) đã gộp vào file này.
 
 ## 5. Quy ước chung
 - Ngẫu nhiên chỉ qua `self.rng` (`Streams`); không `random`, không đồng hồ hệ thống.
