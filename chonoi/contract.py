@@ -5,7 +5,7 @@ import os
 
 from .errors import BadInput
 
-SUPPORTED_VERSIONS = ("1.2",)
+SUPPORTED_VERSIONS = ("1.3",)  # v1.3 = v1.2 + bench_cmd/soak_cmd (Ticket-04)
 NODE_KINDS = ("bong_dien_dien", "bong_sung", "keo_neo")
 FISH_KINDS = ("ca_linh", "ca_loc", "ca_keo")
 

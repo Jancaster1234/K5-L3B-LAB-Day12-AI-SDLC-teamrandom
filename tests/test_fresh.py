@@ -42,7 +42,7 @@ def quan(scenario, ticks, interact_at=()):
 class Manifest(unittest.TestCase):
     def test_contract_v12(self):
         c = load_contract()
-        self.assertEqual(c["contract_version"], "1.2")
+        self.assertEqual(c["contract_version"], "1.3")  # v1.3 giữ gameplay, tuning, kho, JSONL của v1.2
         self.assertEqual(FR, {"initial": 100, "gather_decay_per_s": 0.5, "quan_decay_per_s": 0.25, "spoiled_below": 30})
 
 
