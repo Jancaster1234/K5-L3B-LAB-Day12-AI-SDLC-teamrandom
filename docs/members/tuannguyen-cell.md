@@ -1,6 +1,7 @@
 # tuannguyen-cell — Nguyễn Văn Tuấn
 
-- Tôi đã làm lát 5: [lệnh môi trường Windows](https://github.com/Jancaster1234/K5-L3B-LAB-Day12-AI-SDLC-teamrandom/commit/efe1c64), [hai skill QA/proof](https://github.com/Jancaster1234/K5-L3B-LAB-Day12-AI-SDLC-teamrandom/commit/79d5d27), cập nhật [verification Phase 1](../verification/phase-1.md).
-- Tôi đã kiểm chứng lại [bằng chứng lát 1](../proof/phase-1/gather-lat1/README.md): 4 fixture khớp byte blob Git và hai lần tái chạy; kho ngất rỗng. Suite hiện có đạt 44/44, xem [log QA](../proof/phase-1/qa-lat5/README.md).
-- AI báo khác bằng chứng khi so byte checkout CRLF với output LF. Kiểm tra `core.autocrlf` và blob Git xác định nguyên nhân; script dùng blob gốc và giữ so byte nghiêm ngặt giữa hai lần chạy.
-- Tôi học được cách tách kết quả test theo giả định khỏi xác nhận yêu cầu. Clarify #6/#7 còn chờ PO; test xanh không đủ kết luận toàn phase.
+- Lát 5: [lệnh Windows](https://github.com/Jancaster1234/K5-L3B-LAB-Day12-AI-SDLC-teamrandom/commit/efe1c64), [hai skill QA/proof](https://github.com/Jancaster1234/K5-L3B-LAB-Day12-AI-SDLC-teamrandom/commit/79d5d27), [verification](../verification/phase-1.md); đã tích hợp qua PR #2.
+- Tôi kiểm chứng [proof lát 1](../proof/phase-1/gather-lat1/README.md): bốn fixture khớp blob Git và hai lần chạy; kho ngất rỗng. [Suite lịch sử](../proof/phase-1/qa-lat5/README.md) đạt 44/44.
+- AI nhầm khác biệt CRLF/LF với khác output. Tôi kiểm tra core.autocrlf, đối chiếu blob gốc; giữ so byte giữa hai output mới.
+- Phase 4, việc 12b: [checklist demo](../demo.md), hướng dẫn Windows UTF-8 và phạm vi replay v1.0 trong AGENTS.md. Nền c32eac3 đạt 146/146 test, bàn giao kho v1.2 đúng và hai lần chạy hai Ngày khớp byte. Bàn giao bổ sung trên qa-lat5.
+- Tôi học cách phân biệt test xanh với nghiệm thu. Clarify #6/#7 đã được PO xác nhận; UI/soak còn thuộc Integrator.
