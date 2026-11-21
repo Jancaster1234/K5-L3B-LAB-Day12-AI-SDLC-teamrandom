@@ -112,7 +112,6 @@ Get-Content .local/demo/bench.json
 - [ ] Nói trung thực phần còn thiếu:
   - chưa có Menu chính, DayIntro / DayResult / Summary; Shop chỉ thao tác bàn phím;
   - mở rộng P3 (dòng lũ, khách đặt trước) chưa làm; mở rộng P2 chỉ có `burn`;
-  - `docs/members/ndhai255.md` là bản ghi nhận do Integrator soạn, chờ Đức Hải viết phản tư (AC-P4-05 "Một phần");
   - `chonoi/live.py` (file khung) có thêm route `/assets` để tải ảnh;
   - cảnh lặn vector, cảnh quán/Shop pixel art; log sự kiện có thể đè góc phải dưới ở cửa sổ nhỏ.
 
