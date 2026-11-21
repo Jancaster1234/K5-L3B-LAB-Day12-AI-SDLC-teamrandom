@@ -1,4 +1,4 @@
-# hoangngochieu — phản tư cá nhân (≤ 200 từ)
+# hoangngochieu10012000 (Hoàng Ngọc Hiệu) — phản tư cá nhân (≤ 200 từ)
 
 - Tôi đã làm (kèm link commit):
   - Phụ trách Quán lát 4 (`sim/quan`): logic bếp, bàn, trả tiền, boa (tip), uy tín (reputation), kết thúc ca.
