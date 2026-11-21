@@ -1,6 +1,7 @@
 # hoangngochieu10012000 (Hoàng Ngọc Hiệu) — phản tư cá nhân (≤ 200 từ)
 
 - Tôi đã làm (kèm link commit):
+  - Commit 92b28dd, 9eb6636, b451805, 7e63721 là của tôi, tạo dưới tài khoản cũ hoangngochieu trước khi đổi cấu hình.
   - Phụ trách Quán lát 4 (`sim/quan`): logic bếp, bàn, trả tiền, boa (tip), uy tín (reputation), kết thúc ca.
   - Viết hợp đồng tích hợp giữa lát 3 và lát 4 (`docs/contracts/quan.md`): thứ tự gọi hàm trong `step()` và schema khách hàng.
   - Viết bộ test chuyên biệt cho lát 4 (`tests/test_quan_lat4.py`).
