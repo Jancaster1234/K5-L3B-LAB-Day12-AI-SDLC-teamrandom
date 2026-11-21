@@ -2,7 +2,7 @@
 
 Chỉ chạy `headless_cmd` và đọc JSONL; số liệu đọc từ game.contract.json.
 Giả định đang chờ PO (docs/clarify.md): #1 tên trường `data`, #2 giỏ thiếu chỗ -> nhận một phần,
-#6 vung `catch` hụt vẫn tính hồi chiêu.
+#8 vung `catch` hụt vẫn tính hồi chiêu.
 """
 
 import json
