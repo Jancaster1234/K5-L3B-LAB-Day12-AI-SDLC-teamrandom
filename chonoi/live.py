@@ -6,6 +6,7 @@ Máy chủ HTTP nhỏ (ThreadingHTTPServer) phục vụ `chonoi/web/index.html` 
     GET  /state  -> snapshot JSON hiện tại (cùng trường như dòng snapshot của headless) + `meta` + `events`
     POST /input  -> {"move": [a, b], "interact": bool, "catch": bool}   (trạng thái phím đang giữ)
     POST /restart -> chơi lại từ đầu (cùng seed, cùng scenario)
+    GET  /assets/<file> -> sprite tĩnh trong `chonoi/web/assets/` (nhóm thêm; chỉ client dùng, headless không đụng)
 
 Mô phỏng chạy 60 tick/s trong một luồng nền, dùng CÙNG lớp sim như headless (qua `runner.Session`).
 Client chỉ ĐỌC snapshot và tự bỏ qua trường chưa có, nên luật do nhóm viết thêm trường nào cũng không vỡ.
@@ -29,6 +30,8 @@ from .runner import Session
 from .scenario import load_scenario
 
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
+ASSET_DIR = os.path.join(WEB_DIR, "assets")  # nhóm thêm: sprite cho client (xem CREDITS.md)
+ASSET_TYPES = {".png": "image/png", ".svg": "image/svg+xml", ".txt": "text/plain; charset=utf-8"}
 TICK_S = 1.0 / 60.0
 MAX_BODY = 4096
 RECENT_EVENTS = 40
@@ -147,6 +150,21 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_asset(self, rel):
+        """Phục vụ file tĩnh trong `web/assets/` (sprite của nhóm). Chặn thoát khỏi thư mục và chỉ nhận đuôi đã biết."""
+        ctype = ASSET_TYPES.get(os.path.splitext(rel)[1].lower())
+        root = os.path.realpath(ASSET_DIR)
+        full = os.path.realpath(os.path.join(root, rel))
+        try:
+            inside = os.path.commonpath([root, full]) == root
+        except ValueError:  # Windows: khác ổ đĩa
+            inside = False
+        if not ctype or "\\" in rel or ":" in rel or not inside or not os.path.isfile(full):
+            self._send(404, b'{"error":"khong co"}')
+            return
+        with open(full, "rb") as f:
+            self._send(200, f.read(), ctype)
+
     def do_GET(self):
         path = self.path.split("?", 1)[0]
         if path == "/state":
@@ -157,6 +175,8 @@ class _Handler(BaseHTTPRequestHandler):
                     self._send(200, f.read(), "text/html; charset=utf-8")
             except OSError:
                 self._send(404, b'{"error":"thieu index.html"}')
+        elif path.startswith("/assets/"):
+            self._send_asset(path[len("/assets/"):])
         else:
             self._send(404, b'{"error":"khong co"}')
 

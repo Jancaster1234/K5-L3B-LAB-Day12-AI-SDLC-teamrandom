@@ -57,6 +57,27 @@ class LiveServerTest(unittest.TestCase):
         self.assertFalse(server.game._thread.is_alive())
         self.assertFalse(server._thread.is_alive())
 
+    def test_assets_route_serves_sprites_only(self):
+        """Route /assets/ (nhóm thêm cho sprite): trả PNG có thật, chặn thoát thư mục và đuôi lạ."""
+        tuning = load_contract()["tuning"]
+        server = LiveServer(LiveGame("gather", tuning, {}, 1), port=0)
+        server.start()
+        try:
+            base = f"http://127.0.0.1:{server.port}/assets/"
+            with urllib.request.urlopen(base + "kenney-fish/fish_blue.png", timeout=5) as r:
+                self.assertEqual(r.status, 200)
+                self.assertEqual(r.headers["Content-Type"], "image/png")
+                self.assertEqual(r.read(8), b"\x89PNG\r\n\x1a\n")
+            for bad in ("kenney-fish/khong_co.png", "%2e%2e/index.html", "../../live.py",
+                        "..%2f..%2flive.py", "kenney-fish/..\\..\\index.html", "C:/Windows/win.ini"):
+                with self.subTest(bad=bad):
+                    with self.assertRaises(urllib.error.HTTPError) as cm:
+                        urllib.request.urlopen(base + bad, timeout=5)
+                    self.assertEqual(cm.exception.code, 404)
+                    cm.exception.close()
+        finally:
+            server.stop()
+
 
 if __name__ == "__main__":
     unittest.main()

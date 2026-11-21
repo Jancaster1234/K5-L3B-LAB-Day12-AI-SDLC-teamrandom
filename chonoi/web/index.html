@@ -98,6 +98,29 @@ const KIND_COLOR = { ca_loc: "#7c9a52", ca_linh: "#d6e6f2", ca_keo: "#d9a066", b
 const KIND_NAME = { ca_loc: "cá lóc", ca_linh: "cá linh", ca_keo: "cá kèo", bong_dien_dien: "điên điển", bong_sung: "bông súng", keo_neo: "kèo nèo" };
 const kc = (k) => KIND_COLOR[k] || "#bbbbbb";
 
+// ---------- sprite (Kenney Fish Pack, CC0 — xem CREDITS.md). Chưa tải xong / lỗi thì vẽ hình khối như cũ ----------
+const SPR = {};
+["fish_blue", "fish_green", "fish_grey_long_a", "bubble_a", "bubble_b", "seaweed_green_a", "seaweed_green_b", "seaweed_grass_a",
+ "seaweed_pink_a", "seaweed_orange_a", "rock_a", "rock_b", "background_seaweed_a", "background_seaweed_b", "background_rock_a",
+ "terrain_sand_top_a", "terrain_sand_a"].forEach((n) => { const im = new Image(); im.src = "/assets/kenney-fish/" + n + ".png"; SPR[n] = im; });
+const ok = (n) => SPR[n] && SPR[n].complete && SPR[n].naturalWidth > 0;
+// cá linh: nhỏ, ánh bạc xanh · cá lóc: to, sẫm · cá kèo: thân dài ở đáy. Kích thước theo mét (đơn vị thế giới).
+const FISH_SPRITE = { ca_linh: ["fish_blue", 2.4], ca_loc: ["fish_green", 3.4], ca_keo: ["fish_grey_long_a", 3.4] };
+// Trang trí đáy cố định (không ngẫu nhiên, không đi vào luật): [x mét, sprite, cỡ mét]
+const DECOR = [[4, "seaweed_green_a", 3], [9, "rock_a", 2.2], [13, "seaweed_pink_a", 2.6], [19, "seaweed_grass_a", 2.4], [24, "seaweed_orange_a", 2],
+  [31, "seaweed_green_b", 3.2], [36, "rock_b", 2], [41, "seaweed_pink_a", 2.8], [47, "seaweed_green_a", 3.4], [53, "seaweed_grass_a", 2.2],
+  [58, "rock_a", 2.4], [66, "seaweed_orange_a", 2.4], [71, "seaweed_green_b", 3], [79, "seaweed_pink_a", 2.4], [84, "rock_b", 2.2],
+  [88, "seaweed_green_a", 3.2], [95, "seaweed_grass_a", 2.6]];
+const BACKDROP = [[7, "background_seaweed_a", 6], [22, "background_rock_a", 5], [38, "background_seaweed_b", 7], [55, "background_seaweed_a", 5.5],
+  [69, "background_rock_a", 6], [86, "background_seaweed_b", 6.5]];
+const bubbles = [];          // bọt khí chỉ để trang trí phía client
+const lastPos = {};          // hướng nhìn Cá Sấu suy từ vị trí trước
+function sprite(n, x, y, size, flip, alpha) {
+  const im = SPR[n], hgt = size * im.naturalHeight / im.naturalWidth;
+  ctx.save(); ctx.globalAlpha = alpha ?? 1; ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
+  ctx.drawImage(im, -size / 2, -hgt / 2, size, hgt); ctx.restore();
+}
+
 function fit() {
   const dpr = window.devicePixelRatio || 1;
   const w = innerWidth, h = innerHeight;
@@ -146,6 +169,40 @@ function overlay(w, h) {
   }
 }
 
+// Út Sen: trên mặt nước đội nón lá, dưới nước bơi ngang có bình oxy + chân vịt. Hướng nhìn nhớ lại khi bơi thẳng đứng.
+let diverLeft = false;
+function drawDiver(px, py, p, underwater, s) {
+  const a = ((p.heading_deg || 0) * Math.PI) / 180, moving = p.vel && Math.hypot(p.vel[0], p.vel[1]) > 0.05;
+  if (Math.abs(Math.cos(a)) > 0.2) diverLeft = Math.cos(a) < 0;
+  const t = performance.now() / 1000;
+  ctx.save(); ctx.translate(px, py); if (diverLeft) ctx.scale(-1, 1);
+  if (!underwater) {
+    const bob = Math.sin(t * 2) * 0.06 * s;
+    ctx.translate(0, bob);
+    ctx.fillStyle = "#ff8a3d"; ctx.beginPath(); ctx.ellipse(0, 0.05 * s, 0.55 * s, 0.35 * s, 0, Math.PI, 0); ctx.fill();   // vai áo
+    ctx.fillStyle = "#f1c27d"; ctx.beginPath(); ctx.arc(0, -0.45 * s, 0.32 * s, 0, Math.PI * 2); ctx.fill();             // mặt
+    ctx.fillStyle = "#222"; ctx.beginPath(); ctx.arc(0.12 * s, -0.48 * s, 0.04 * s, 0, Math.PI * 2); ctx.fill();          // mắt
+    ctx.fillStyle = "#e9d8a6"; ctx.strokeStyle = "#a88b4a"; ctx.lineWidth = 1;                                             // nón lá
+    ctx.beginPath(); ctx.moveTo(-0.85 * s, -0.62 * s); ctx.lineTo(0, -1.25 * s); ctx.lineTo(0.85 * s, -0.62 * s); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "rgba(73,176,220,.55)"; ctx.fillRect(-0.9 * s, 0.05 * s, 1.8 * s, 0.4 * s);                           // nước che thân
+  } else {
+    const tilt = Math.max(-0.9, Math.min(0.9, Math.atan2(Math.sin(a), Math.abs(Math.cos(a)) || 1e-6)));
+    ctx.rotate(tilt);
+    const kick = moving ? Math.sin(t * 10) * 0.25 * s : Math.sin(t * 3) * 0.08 * s;
+    ctx.fillStyle = "#1e4f7a";                                                                                            // chân + chân vịt
+    ctx.beginPath(); ctx.moveTo(-0.6 * s, -0.1 * s); ctx.lineTo(-1.4 * s, -0.15 * s + kick); ctx.lineTo(-1.9 * s, -0.35 * s + kick); ctx.lineTo(-1.9 * s, 0.05 * s + kick); ctx.lineTo(-0.6 * s, 0.15 * s); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-0.6 * s, 0.05 * s); ctx.lineTo(-1.4 * s, 0.15 * s - kick); ctx.lineTo(-1.9 * s, 0.0 * s - kick); ctx.lineTo(-1.9 * s, 0.35 * s - kick); ctx.lineTo(-0.6 * s, 0.25 * s); ctx.fill();
+    ctx.fillStyle = "#9aa7b0"; ctx.beginPath(); ctx.ellipse(-0.1 * s, -0.38 * s, 0.55 * s, 0.16 * s, 0, 0, Math.PI * 2); ctx.fill(); // bình oxy
+    ctx.fillStyle = "#ff8a3d"; ctx.beginPath(); ctx.ellipse(0, 0, 0.75 * s, 0.3 * s, 0, 0, Math.PI * 2); ctx.fill();        // thân
+    ctx.fillStyle = "#111"; ctx.beginPath(); ctx.moveTo(0.75 * s, -0.25 * s); ctx.quadraticCurveTo(0.2 * s, -0.55 * s, -0.4 * s, -0.25 * s + kick * 0.4); ctx.lineTo(0.6 * s, -0.1 * s); ctx.fill(); // tóc
+    ctx.fillStyle = "#f1c27d"; ctx.beginPath(); ctx.arc(0.95 * s, -0.05 * s, 0.27 * s, 0, Math.PI * 2); ctx.fill();         // mặt
+    ctx.fillStyle = "#7fe3ff"; ctx.strokeStyle = "#263238"; ctx.lineWidth = 1.5;                                          // kính lặn
+    ctx.beginPath(); ctx.ellipse(1.07 * s, -0.08 * s, 0.13 * s, 0.1 * s, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#f1c27d"; ctx.beginPath(); ctx.ellipse(0.6 * s, 0.3 * s, 0.28 * s, 0.09 * s, 0.4, 0, Math.PI * 2); ctx.fill();   // tay
+  }
+  ctx.restore();
+}
+
 // ----- cảnh GATHER: nhìn ngang, x sang phải, d xuống -----
 function drawGather(w, h) {
   const meta = snap.meta || {};
@@ -160,7 +217,33 @@ function drawGather(w, h) {
   const g = ctx.createLinearGradient(0, oy, 0, sy(D));
   g.addColorStop(0, "#49b0dc"); g.addColorStop(1, "#08243f");
   ctx.fillStyle = g; ctx.fillRect(sx(0), oy, X * s, D * s);
-  ctx.strokeStyle = "#e9f7ff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx(0), oy); ctx.lineTo(sx(X), oy); ctx.stroke();
+  const now = performance.now() / 1000;
+  // tia nắng xiên mờ
+  ctx.save(); ctx.beginPath(); ctx.rect(sx(0), oy, X * s, D * s); ctx.clip();
+  for (let i = 0; i < 6; i++) {
+    const bx = sx(8 + i * 17 + Math.sin(now * 0.3 + i) * 2);
+    ctx.fillStyle = "rgba(255,255,255,0.05)"; ctx.beginPath();
+    ctx.moveTo(bx, oy); ctx.lineTo(bx + 2.5 * s, oy); ctx.lineTo(bx + 9 * s, sy(D)); ctx.lineTo(bx + 4 * s, sy(D)); ctx.fill();
+  }
+  // nền xa: rong + đá mờ
+  BACKDROP.forEach(([x, n, sz]) => { if (ok(n)) sprite(n, sx(x), sy(D) - sz * 0.45 * s, sz * s, false, 0.35); });
+  ctx.restore();
+  // mặt nước gợn sóng
+  ctx.strokeStyle = "#e9f7ff"; ctx.lineWidth = 2; ctx.beginPath();
+  for (let x = 0; x <= X; x += 0.5) { const yy = oy + Math.sin(x * 0.7 + now * 2) * 0.12 * s; x ? ctx.lineTo(sx(x), yy) : ctx.moveTo(sx(x), yy); }
+  ctx.stroke();
+  // đáy cát + rong, đá (chỉ trang trí)
+  const tile = 2 * s;
+  if (ok("terrain_sand_top_a")) {
+    ctx.save(); ctx.beginPath(); ctx.rect(sx(0), oy, X * s, D * s + tile); ctx.clip();
+    for (let x = 0; x < X; x += 2) ctx.drawImage(SPR.terrain_sand_top_a, sx(x), sy(D) - tile * 0.55, tile + 1, tile + 1);
+    ctx.restore();
+  }
+  DECOR.forEach(([x, n, sz], i) => {
+    if (!ok(n)) return;
+    const im = SPR[n], hgt = sz * s * im.naturalHeight / im.naturalWidth, sway = n.startsWith("seaweed") ? Math.sin(now * 1.3 + i) * 0.05 : 0;
+    ctx.save(); ctx.translate(sx(x), sy(D) - tile * 0.25); ctx.rotate(sway); ctx.drawImage(im, -sz * s / 2, -hgt, sz * s, hgt); ctx.restore();
+  });
   // vạch độ sâu
   for (let d = 5; d <= D; d += 5) {
     ctx.strokeStyle = "rgba(255,255,255,.08)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(sx(0), sy(d)); ctx.lineTo(sx(X), sy(d)); ctx.stroke();
@@ -175,20 +258,60 @@ function drawGather(w, h) {
   // nút hái
   (snap.nodes || []).forEach((n) => {
     const ready = n.ready !== false;
-    ctx.globalAlpha = ready ? 1 : 0.35;
-    ctx.fillStyle = kc(n.kind); ctx.beginPath(); ctx.ellipse(sx(n.pos[0]), sy(n.pos[1]) - 0.1 * s, 0.9 * s, 0.4 * s, 0, 0, Math.PI * 2); ctx.fill();
+    const nx = sx(n.pos[0]), ny = sy(n.pos[1]);
+    // lá nổi + thân rủ xuống nước; còn hoa thì vẽ bông theo màu loại
+    ctx.strokeStyle = "rgba(60,120,60,.6)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(nx, ny); ctx.quadraticCurveTo(nx + 0.4 * s, ny + 1.5 * s, nx - 0.2 * s, ny + 3 * s); ctx.stroke();
+    ctx.fillStyle = "#3f8f4a"; ctx.beginPath(); ctx.ellipse(nx, ny, 1.1 * s, 0.3 * s, 0, 0.15, Math.PI * 2 - 0.15); ctx.lineTo(nx, ny); ctx.fill();
+    ctx.globalAlpha = ready ? 1 : 0.3;
+    ctx.fillStyle = kc(n.kind);
+    for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + (k - 2) * 0.45; ctx.beginPath(); ctx.ellipse(nx + Math.cos(a) * 0.35 * s, ny - 0.35 * s + Math.sin(a) * 0.35 * s, 0.28 * s, 0.14 * s, a, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = "#fff3b0"; ctx.beginPath(); ctx.arc(nx, ny - 0.3 * s, 0.12 * s, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
     text(n.id, sx(n.pos[0]), sy(n.pos[1]) - 0.7 * s, { size: 10, align: "center", color: "#234" });
     if (!ready && n.regrow_ticks) text(Math.ceil(n.regrow_ticks / 60) + "s", sx(n.pos[0]), sy(n.pos[1]) + 1.1 * s, { size: 10, align: "center", color: "#fff" });
   });
   // đàn cá
   (snap.fish || []).forEach((f) => {
-    ctx.save(); ctx.translate(sx(f.pos[0]), sy(f.pos[1])); ctx.rotate(((f.heading_deg || 0) * Math.PI) / 180);
-    ctx.fillStyle = kc(f.kind);
-    ctx.beginPath(); ctx.ellipse(0, 0, 0.9 * s, 0.45 * s, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(-0.8 * s, 0); ctx.lineTo(-1.4 * s, -0.4 * s); ctx.lineTo(-1.4 * s, 0.4 * s); ctx.fill();
+    const a = ((f.heading_deg || 0) * Math.PI) / 180, left = Math.cos(a) < 0, spec = FISH_SPRITE[f.kind];
+    if (spec && ok(spec[0])) {
+      // sprite nhìn sang phải: lật ngang khi bơi sang trái, nghiêng nhẹ theo hướng lên/xuống
+      const tilt = Math.max(-0.25, Math.min(0.25, Math.atan2(Math.sin(a), Math.abs(Math.cos(a)) || 1e-6)));
+      ctx.save(); ctx.translate(sx(f.pos[0]), sy(f.pos[1])); ctx.rotate(left ? -tilt : tilt);
+      sprite(spec[0], 0, Math.sin(performance.now() / 300 + f.pos[0]) * 0.05 * s, spec[1] * s, left);
+      ctx.restore();
+    } else {
+      ctx.save(); ctx.translate(sx(f.pos[0]), sy(f.pos[1])); ctx.rotate(a);
+      ctx.fillStyle = kc(f.kind);
+      ctx.beginPath(); ctx.ellipse(0, 0, 0.9 * s, 0.45 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-0.8 * s, 0); ctx.lineTo(-1.4 * s, -0.4 * s); ctx.lineTo(-1.4 * s, 0.4 * s); ctx.fill();
+      ctx.restore();
+    }
+    text(KIND_NAME[f.kind] || f.id, sx(f.pos[0]), sy(f.pos[1]) - 0.9 * s, { size: 10, align: "center", color: "rgba(255,255,255,.7)" });
+  });
+  // Cá Sấu (snapshot có `monsters`, trước đây client chưa vẽ)
+  (snap.monsters || []).forEach((m) => {
+    const prev = lastPos[m.id], mx = sx(m.pos[0]), my = sy(m.pos[1]);
+    let left = prev ? prev.left : false;
+    if (prev && Math.abs(m.pos[0] - prev.x) > 1e-3) left = m.pos[0] < prev.x;
+    lastPos[m.id] = { x: m.pos[0], left };
+    const chase = m.state === "chase";
+    ctx.save(); ctx.translate(mx, my); if (left) ctx.scale(-1, 1);
+    const body = chase ? "#5d7a2e" : "#4e6b3a", belly = "#c9c48a", sw = Math.sin(performance.now() / 180) * 0.25 * s;
+    ctx.fillStyle = body;  // đuôi
+    ctx.beginPath(); ctx.moveTo(-1.2 * s, -0.25 * s); ctx.quadraticCurveTo(-2.4 * s, sw, -3.2 * s, sw * 1.4); ctx.quadraticCurveTo(-2.4 * s, 0.35 * s + sw, -1.2 * s, 0.35 * s); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, 0, 1.5 * s, 0.5 * s, 0, 0, Math.PI * 2); ctx.fill();               // thân
+    ctx.fillStyle = belly; ctx.beginPath(); ctx.ellipse(0, 0.25 * s, 1.3 * s, 0.22 * s, 0, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = body;  // mõm (há khi đuổi)
+    const jaw = chase ? 0.25 * s * (1 + Math.sin(performance.now() / 120)) / 2 : 0.05 * s;
+    ctx.beginPath(); ctx.moveTo(1.2 * s, -0.35 * s); ctx.lineTo(2.7 * s, -0.12 * s - jaw); ctx.lineTo(2.7 * s, 0); ctx.lineTo(1.3 * s, 0); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(1.3 * s, 0.05 * s); ctx.lineTo(2.6 * s, 0.05 * s + jaw); ctx.lineTo(2.5 * s, 0.25 * s + jaw); ctx.lineTo(1.2 * s, 0.35 * s); ctx.fill();
+    ctx.fillStyle = "#fff"; for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(1.5 * s + k * 0.3 * s, 0); ctx.lineTo(1.6 * s + k * 0.3 * s, 0.12 * s); ctx.lineTo(1.7 * s + k * 0.3 * s, 0); ctx.fill(); }
+    ctx.fillStyle = "#4e6b3a"; ctx.beginPath(); ctx.moveTo(-0.6 * s, 0.4 * s); ctx.lineTo(-0.3 * s, 0.85 * s); ctx.lineTo(0, 0.4 * s); ctx.fill();  // chân
+    ctx.beginPath(); ctx.moveTo(0.6 * s, 0.4 * s); ctx.lineTo(0.9 * s, 0.85 * s); ctx.lineTo(1.1 * s, 0.4 * s); ctx.fill();
+    ctx.fillStyle = chase ? "#ffeb3b" : "#e8e2a0"; ctx.beginPath(); ctx.arc(1.25 * s, -0.42 * s, 0.14 * s, 0, Math.PI * 2); ctx.fill();  // mắt
+    ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(1.29 * s, -0.42 * s, 0.06 * s, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    text(f.id, sx(f.pos[0]), sy(f.pos[1]) - 0.7 * s, { size: 10, align: "center", color: "rgba(255,255,255,.8)" });
+    if (chase) text("!", mx, my - 1.0 * s, { size: 18, align: "center", color: "#ffeb3b" });
   });
   // người chơi
   const p = snap.player;
@@ -197,11 +320,16 @@ function drawGather(w, h) {
     const underwater = p.at_surface === undefined ? p.pos[1] > 0.5 : !p.at_surface;
     if (meta.catch_radius && underwater) { ctx.strokeStyle = "rgba(255,255,255,.25)"; ctx.beginPath(); ctx.arc(px, py, meta.catch_radius * s, 0, Math.PI * 2); ctx.stroke(); }
     if (meta.interact_radius && !underwater) { ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.arc(px, py, meta.interact_radius * s, 0, Math.PI * 2); ctx.stroke(); }
-    if (!(p.invuln_ticks > 0 && Math.floor(snap.tick / 5) % 2)) {
-      ctx.fillStyle = "#ff8a3d"; ctx.beginPath(); ctx.arc(px, py, 0.6 * s, 0, Math.PI * 2); ctx.fill();
-      const a = ((p.heading_deg || 0) * Math.PI) / 180;
-      ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(a) * 0.9 * s, py + Math.sin(a) * 0.9 * s); ctx.stroke();
-    }
+    if (!(p.invuln_ticks > 0 && Math.floor(snap.tick / 5) % 2)) drawDiver(px, py, p, underwater, s);
+    // bọt khí từ thợ lặn (chỉ trang trí phía client)
+    if (underwater && Math.random() < 0.06) bubbles.push({ x: p.pos[0] + 0.3, d: p.pos[1] - 0.3, r: 0.15 + Math.random() * 0.2, n: Math.random() < 0.5 ? "bubble_a" : "bubble_b" });
+  }
+  for (let i = bubbles.length - 1; i >= 0; i--) {
+    const bb = bubbles[i];
+    bb.d -= 0.06; bb.x += Math.sin(bb.d * 3) * 0.02;
+    if (bb.d <= 0.1) { bubbles.splice(i, 1); continue; }
+    if (ok(bb.n)) sprite(bb.n, sx(bb.x), sy(bb.d), bb.r * 2 * s, false, 0.8);
+    else { ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.beginPath(); ctx.arc(sx(bb.x), sy(bb.d), bb.r * s, 0, Math.PI * 2); ctx.stroke(); }
   }
   // HUD trên
   text("⏱ " + fmtTime(snap.time_left_ticks), 14, 28, { size: 20 });
