@@ -35,3 +35,8 @@
   - **Cách nhóm xác minh:** Người đọc lại diff và đối chiếu trực tiếp PRD-0/Ticket từ lab board trước khi gộp, sửa toàn bộ mục chưa kiểm thành giả định, xóa nội dung bịa và chạy lại toàn bộ `unittest` + `headless` kiểm chứng bằng chứng thật.
 - **Nếu làm lại, đổi gì:**
   - Dán nguyên văn PRD/Ticket vào repo hoặc cho AI ngay từ phút đầu mỗi phase; chạy `check_team.py` và đối chiếu contract trước khi chia nhánh song song.
+
+## Sau phát hành (Integrator `Jancaster1234`, 2026-11-21 tối)
+- **Đã làm:** Release v1.1.0 chỉ đổi client (đồ họa ba cảnh, asset Kenney CC0), luật/contract/headless giữ nguyên; chạy lại suite tại cả 5 tag và clone sạch từ GitHub để chắc "chạy được tại từng tag".
+- **Học được:** kiểm giao diện bằng ảnh chụp thật bắt được lỗi mà test không thấy (emoji 🫧 thành ô vuông trên Windows 10, chữ đè quầy bếp, quầy Shop tràn mép). Lần sau đưa bước chụp ảnh vào checklist QA ngay từ Phase 2, không để tới sau demo.
+- **Còn mở:** phản tư của `ndhai255` (đang là bản ghi nhận do Integrator soạn), ảnh chế độ tương phản cao, Menu/DayIntro/Summary, mở rộng P3.

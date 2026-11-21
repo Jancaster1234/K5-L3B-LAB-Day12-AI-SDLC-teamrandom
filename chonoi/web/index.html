@@ -624,8 +624,8 @@ function warnings(w, h) {
       list.push(["🐊 Thủy quái!", "#ce93d8"]);
       ctx.strokeStyle = hc ? "#ff00ff" : "#ab47bc"; ctx.lineWidth = hc ? 10 : 6; ctx.strokeRect(3, 3, w - 6, h - 6);
     }
-    if (p.oxygen_ticks === 0 && !p.at_surface) list.push(["🫧 Hết hơi! Nổi lên ngay", "#ef5350"]);
-    else if (p.oxygen_max_ticks && p.oxygen_ticks < p.oxygen_max_ticks * 0.25 && !p.at_surface) list.push(["🫧 Oxy sắp hết", "#ffca28"]);
+    if (p.oxygen_ticks === 0 && !p.at_surface) list.push(["⚠️ Hết hơi! Nổi lên ngay", "#ef5350"]);
+    else if (p.oxygen_max_ticks && p.oxygen_ticks < p.oxygen_max_ticks * 0.25 && !p.at_surface) list.push(["💨 Oxy sắp hết", "#ffca28"]);
   }
   if (phase === "quan") {
     const patMax = ((snap.meta || {}).patience_s || 60) * 60;

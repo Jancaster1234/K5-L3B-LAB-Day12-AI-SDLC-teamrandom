@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] - sau v1.1.0
+
+### Fixed
+- Cảnh báo oxy dùng emoji 🫧 (Unicode 14) hiện thành ô vuông trên Windows 10 → đổi sang ⚠️ / 💨.
+
+### Added
+- Bằng chứng giao diện `docs/proof/phase-4/ui/` (ảnh 3 cảnh báo + ba cảnh), clone sạch từ GitHub và chạy suite tại từng tag (`docs/proof/phase-4/qa/clean-clone.txt`).
+
 ## [v1.1.0] - 2026-11-21 — Đồ họa (Test Contract vẫn v1.3)
 
 ### Added
