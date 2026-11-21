@@ -4,7 +4,7 @@
 
 | Thành viên | GitHub handle | Module chính | Vai quy trình | Người dự phòng cho |
 |---|---|---|---|---|
-| | | `sim/gather` — lát 1: oxy, ngạt, Máu, ngất | Integrator (giữ `docs/contracts/`, gộp code, gắn tag) | lát 2 |
+| Phúc (trưởng nhóm) | Jancaster1234 | `sim/gather` — lát 1: oxy, ngạt, Máu, ngất | Integrator (giữ `docs/contracts/`, gộp code, gắn tag) | lát 2 |
 | | | `sim/gather` — lát 2: hái nút, bắt cá, giỏ đầy | Dev | lát 1 |
 | | | `sim/quan` — lát 3: khách, giữ chỗ, kiên nhẫn | PO (đọc PRD trên lab board, hỏi giảng viên, giữ `docs/clarify.md`, viết `docs/plan/`) | lát 4 |
 | | | `sim/quan` — lát 4: bếp, bàn, trả tiền, boa, uy tín | Scrum/Release (`docs/standup.md`, `CHANGELOG.md`, Release) | lát 3 |
