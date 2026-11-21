@@ -4,3 +4,5 @@ __pycache__/
 !tests/fixtures/*.jsonl
 !docs/proof/**/*.jsonl
 .DS_Store
+.venv/
+.local/
