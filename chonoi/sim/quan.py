@@ -55,6 +55,7 @@ class QuanSim:
         raw_stock = inventory if inventory is not None else scenario.get("stock", {})
         self.stock = {k: v for k, v in raw_stock.items() if v > 0}
         self.patience_full = int(round(t["patience_s"] * TICK))
+        self.burn_ticks = None if t.get("burn_s") is None else int(round(t["burn_s"] * TICK))
         self.random_customers = scenario.get("random_customers", True)
         self.time_left_ticks = scenario.get("time_left_ticks", int(round(t["duration_s"] * TICK)))
         self.reputation = float(reputation if reputation is not None else scenario.get("reputation", t["reputation_initial"]))
@@ -211,13 +212,15 @@ class QuanSim:
                 c["eat_ticks_left"] = max(0, c["eat_ticks_left"] - 1)
             else:
                 c["patience_ticks_left"] = max(0, c["patience_ticks_left"] - 1)
-        # 2. bếp nấu xong
+        # 2. bếp nấu xong; mở rộng burn: món chín quá burn_s thì cháy (xét theo id bếp, trước di chuyển)
         for s in sort_by_id(self.stoves):
             if s["state"] == "cooking" and s["cook_ticks_left"] == 0:
                 s["state"] = "ready"
                 s["ready_ticks"] = 0
                 events.append(("dish_ready", {"stove_id": s["id"], "order_id": s["dish"]["order_id"],
                                               "dish_id": s["dish"]["dish_id"]}))
+            elif s["state"] == "ready" and self.burn_ticks is not None and s["ready_ticks"] > self.burn_ticks:
+                self._burn(s, events)
         # 3. đi lại + tối đa một interact
         self._move(inp)
         if inp.pressed("interact"):
@@ -380,6 +383,24 @@ class QuanSim:
         self.customers.remove(c)
         events.append(("customer_left", {"order_id": c["id"], "table_id": c["table_id"], "reason": reason,
                                          "reputation": self.reputation}))
+
+    def _burn(self, s, events):
+        """Mở rộng burn (Ticket-02 mục 3): bỏ món, nguyên liệu mất, bếp rảnh ngay; thử giữ lại ngay cho đơn —
+        đủ thì reserved, thiếu thì unfulfillable (khách tiếp tục chờ tới hết kiên nhẫn). Đúng burn_s vẫn bưng được."""
+        pl = s["dish"]
+        s.update(state="idle", dish=None, cook_ticks_left=0, ready_ticks=0)
+        c = next((c for c in self.customers if c["id"] == pl["order_id"]), None)
+        status = None
+        if c is not None:
+            recipe = self.menu[c["dish_id"]]["recipe"]
+            avail = self._available()
+            if all(avail.get(k, 0) >= q for k, q in recipe.items()):
+                c.update(order_status="reserved", reserved=dict(recipe))
+            else:
+                c.update(order_status="unfulfillable", reserved={})
+            status = c["order_status"]
+        events.append(("dish_burnt", {"stove_id": s["id"], "order_id": pl["order_id"], "dish_id": pl["dish_id"],
+                                      "order_status": status}))
 
     def _clamp_rep(self, value) -> float:
         lo, hi = float(self.t.get("reputation_min", 0)), float(self.t.get("reputation_max", 5))
