@@ -178,7 +178,7 @@ class QuanSim:
     def snapshot(self) -> dict:
         occupied = {c["table_id"]: c["id"] for c in self.customers}
         return {
-            "player": {"pos": self.pos},
+            "player": {"pos": self.pos, "vel": self.vel},
             "stock": {k: self.stock[k] for k in sorted(self.stock) if self.stock[k] > 0},
             "hand": self.hand,
             "stoves": [{k: s.get(k) for k in ("id", "pos", "state", "dish", "cook_ticks_left", "ready_ticks")}
@@ -301,8 +301,9 @@ class QuanSim:
         if not orders:
             return
         c = min(orders, key=lambda c: (c["order_tick"], id_key(c["table_id"])))
-        items = {k: c["reserved"][k] for k in sorted(c["reserved"])}
-        for k, q in items.items():
+        used = {k: c["reserved"][k] for k in sorted(c["reserved"])}
+        items = [k for k in used for _ in range(used[k])]  # PRD-0 mục E: mảng kind, sắp theo kind
+        for k, q in used.items():
             self.stock[k] -= q
             if self.stock[k] <= 0:
                 del self.stock[k]

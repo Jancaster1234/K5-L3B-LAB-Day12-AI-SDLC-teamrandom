@@ -66,7 +66,7 @@ class QuanFlow(unittest.TestCase):
         f.step(interact=True)
         self.assertEqual(f.events[-1]["name"], "cook_started")
         self.assertEqual(f.events[-1]["data"], {"stove_id": "B1", "order_id": cid, "dish_id": DISH,
-                                                 "items": MENU[DISH]["recipe"], "base_price": MENU[DISH]["price"]})
+                                                 "items": [k for k in sorted(MENU[DISH]["recipe"]) for _ in range(MENU[DISH]["recipe"][k])], "base_price": MENU[DISH]["price"]})
         self.assertEqual(f.s.sim.stock, {})
         self.assertEqual(f.s.sim.customers[0]["reserved"], {})  # phần giữ chỗ đã vào nồi
 

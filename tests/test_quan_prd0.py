@@ -122,11 +122,24 @@ class Interact(unittest.TestCase):
               "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH, "order_tick": 7}]}
         s, evs = run(sc, 1, interact_at={0})
         self.assertEqual(ev(evs, "cook_started")["data"], {"stove_id": "B1", "order_id": "C1", "dish_id": DISH,
-                                                            "items": {"ca_loc": 1}, "base_price": PRICE})
+                                                            "items": ["ca_loc"], "base_price": PRICE})
         c = s.sim.customers[0]
         self.assertEqual((c["order_status"], c["reserved"]), ("assigned", {}))
         self.assertEqual(s.sim.stock, {"ca_loc": 1})
         self.assertEqual(s.sim.stoves[0]["dish"], pay())
+
+
+class Contract(unittest.TestCase):
+    def test_items_la_mang_kind_sap_theo_kind(self):
+        dish = "lau_ca_linh_dien_dien"  # ca_linh x3 + bong_dien_dien x1
+        sc = {"player": {"pos": STOVE}, "stock": {"ca_linh": 3, "bong_dien_dien": 1},
+              "customers": [{"id": "C1", "table_id": "T1", "dish_id": dish}]}
+        _, evs = run(sc, 1, interact_at={0})
+        self.assertEqual(ev(evs, "cook_started")["data"]["items"], ["bong_dien_dien", "ca_linh", "ca_linh", "ca_linh"])
+
+    def test_snapshot_player_quan_co_pos_va_vel(self):
+        s, _ = run({}, 0)
+        self.assertEqual(set(s.snapshot()["player"]), {"pos", "vel"})
 
 
 class Timers(unittest.TestCase):
