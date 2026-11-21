@@ -1,0 +1,13 @@
+# Gộp tên/email commit về đúng GitHub handle trong TEAM.md (git shortlog -sn, git log).
+# Căn cứ: login GitHub của từng email (gh api .../commits/<sha> → author.login) và lời xác nhận của chính người đó.
+#
+# Đức Hải: commit bằng email riêng, GitHub vẫn gắn login ndhai255.
+ndhai255 <352848704+ndhai255@users.noreply.github.com> <ndhai255.work@gmail.com>
+# Hiệu: 4 commit lát 4 (92b28dd, 9eb6636, b451805, 7e63721) đẩy từ tài khoản phụ `hoangngochieu`;
+# Hiệu tự xác nhận trong docs/members (commit d93825e).
+hoangngochieu10012000 <hoangngochieu10012000@gmail.com> <hoangngochieutin92018@gmail.com>
+# Quang Hải: commit merge PR trên web GitHub dùng email noreply.
+HaiVuQ <haivq25@gmail.com> <166117536+HaiVuQ@users.noreply.github.com>
+#
+# "Hai Duong": tác giả starter lab (9 commit trước khi nhóm bắt đầu, 2026-11-20 22:38 → 2026-11-21 08:52),
+# không phải thành viên nhóm; giữ nguyên.

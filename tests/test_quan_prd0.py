@@ -131,6 +131,37 @@ class Interact(unittest.TestCase):
         self.assertEqual(s.sim.stoves[0]["dish"], pay(base=fresh_price(PRICE, [24000 - 1])))
 
 
+class Clarify11(unittest.TestCase):
+    """clarify #11, đối chiếu nguyên văn PRD-0 mục F: "Bếp idle lấy đơn reserved cũ nhất theo order_tick rồi id
+    bàn, tiêu đúng nguyên liệu giữ, chốt giá và bắt đầu nấu. Bếp ready giao món cho tay trống và về idle." """
+
+    def test_bep_idle_van_nau_khi_tay_dang_cam_mon(self):
+        # chỉ bếp ready mới đòi tay trống; bếp idle nấu được dù tay đang cầm món của đơn khác
+        sc = {"player": {"pos": STOVE}, "hand": pay("C1"), "stock": stock_items({"ca_loc": 1}),
+              "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH, "order_status": "assigned"},
+                            {"id": "C2", "table_id": "T2", "dish_id": DISH}]}
+        s, evs = run(sc, 1, interact_at={0})
+        self.assertEqual(names(evs), ["cook_started"])
+        self.assertEqual(ev(evs, "cook_started")["data"]["order_id"], "C2")
+        self.assertEqual(s.sim.hand, pay("C1"))
+
+    def test_bep_chon_don_reserved_cu_nhat_theo_order_tick_roi_id_ban(self):
+        sc = {"player": {"pos": STOVE}, "stock": stock_items({"ca_loc": 3}),
+              "customers": [{"id": "C1", "table_id": "T3", "dish_id": DISH, "order_tick": 5},
+                            {"id": "C2", "table_id": "T2", "dish_id": DISH, "order_tick": 5},
+                            {"id": "C3", "table_id": "T1", "dish_id": DISH, "order_tick": 9}]}
+        _, evs = run(sc, 1, interact_at={0})
+        self.assertEqual(ev(evs, "cook_started")["data"]["order_id"], "C2")  # order_tick 5, rồi T2 < T3
+
+    def test_customer_left_reputation_la_uy_tin_sau_khi_doi(self):
+        sc = {"stock": stock_items({"ca_loc": 1}),
+              "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH, "patience_ticks_left": 1}]}
+        s, evs = run(sc, 1)
+        after = Q["reputation_initial"] + Q["left_reputation_delta"]
+        self.assertAlmostEqual(ev(evs, "customer_left")["data"]["reputation"], after)
+        self.assertAlmostEqual(s.sim.reputation, after)
+
+
 class Contract(unittest.TestCase):
     def test_items_la_mang_kind_sap_theo_kind(self):
         dish = "lau_ca_linh_dien_dien"  # ca_linh x3 + bong_dien_dien x1
