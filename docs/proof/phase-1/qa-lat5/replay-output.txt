@@ -1,0 +1,9 @@
+Command: D:\Vinuni_AI\K5-L3B-LAB-Day12-AI-SDLC-teamrandom\.venv\Scripts\python.exe .agents/skills/verify-phase-proof/scripts/replay_lat1.py
+Base commit: b1f71eea2b7c2938d719996ec1ad246ecf1670ee
+Python: 3.13.3
+PASS 01-oxy: HEAD archive == replay 1 == replay 2; SHA256=e91f20e08724a4977096c5c83159e453e969d214ba3fcb27f513d21a715fdbfd
+PASS 02-choke: HEAD archive == replay 1 == replay 2; SHA256=3ea07eb016e5d7e29a7c9698498521c6a84606e6e9b0c13673c90050a819dd53
+PASS 03-faint: HEAD archive == replay 1 == replay 2; SHA256=a6e9dc87c22ef8e4a34c2d0e17c2b26140bd149cafebca048562989dbcd5e9d2
+PASS 04-dive-surface: HEAD archive == replay 1 == replay 2; SHA256=98bbfa88fd8b2f9e4656fe51680c267b9ef708ece48aaadff5c2ce59c5cbb5fc
+
+Exit code: 0
