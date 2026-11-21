@@ -9,7 +9,7 @@
 | AC-P2-05 — `--mode day` công bố D1–D5, chốt Ngày khi Shop đóng | Smoke `day --days 1`; test chuỗi pha, kế hoạch, món theo kế hoạch | [Bằng chứng P2 #2](../proof/phase-2/README.md), [day1.jsonl](../proof/phase-2/day1.jsonl) | Đạt (22.200 tick trong 713 ms) |
 | AC-P2-06 — Áp cấp oxygen/hp từ Ngày kế | 3 Ngày: mua cấp 1 cả hai, Ngày 2 `oxygen_max_ticks 2700`, `hp_max 4` | [Bằng chứng P2 #3](../proof/phase-2/README.md), [upgrades.jsonl](../proof/phase-2/upgrades.jsonl) | Đạt |
 | AC-P2-07 — Pause dừng mọi timer (cả Shop) | `Pause.test_pause_dung_moi_timer`, `test_pause_o_mode_gather` | [tests/test_day.py](../../tests/test_day.py) | Đạt |
-| AC-P2-08 — Menu, pause, HUD trên cửa sổ chơi | Chơi thử `python3 -m chonoi.live` | — | **Chưa đạt** (cửa sổ thử chưa có menu/intro/Shop/HUD v1.1) |
+| AC-P2-08 — Menu, pause, HUD trên cửa sổ chơi | `python3 -m chonoi.live --mode day`: chạy thử qua HTTP cập bến → quán → Shop (mua, Enter đóng) → Ngày 2; Esc/P tạm dừng làm `sim_tick` đứng yên | [chonoi/web/index.html](../../chonoi/web/index.html), [chonoi/live.py](../../chonoi/live.py) | **Một phần**: chơi trọn vòng ngày, pause, Shop, HUD (Ngày, cần lấy/đã lấy, cảnh báo). Chưa có menu chính, DayIntro/EveningIntro/DayResult/Summary |
 | AC-P2-09 — Smoke tích hợp có bằng chứng | `gather --inventory-out` → `quan --inventory`, so `stock` tick 0 | [integration-*](../proof/phase-2/README.md) | Đạt |
 | AC-P2-10 — Regression P1 đạt với số chuẩn, test đổi có lý do | Toàn suite; lý do đổi test trong commit `3f4dd66`, `d7cdf6d` | [Log 123 test](../proof/phase-2/test-output.txt) | Đạt |
 | AC-P2-11 — Mở rộng (nhóm 5 người ≥ 1) có test | `burn`: 4 test | [tests/test_ext_burn.py](../../tests/test_ext_burn.py) | Đạt |
