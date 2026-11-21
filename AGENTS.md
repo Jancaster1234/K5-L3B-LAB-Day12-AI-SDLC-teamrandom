@@ -4,6 +4,8 @@
 
 ## Lệnh
 - Test: `PYTHONPATH=tests:. python3 -m unittest discover -s tests -v`
+- Windows PowerShell: `powershell -ExecutionPolicy Bypass -File .\lab.ps1 setup`, sau đó `powershell -ExecutionPolicy Bypass -File .\lab.ps1 test`.
+- Nếu chạy test thủ công trên Windows: `$env:PYTHONPATH = 'tests;.'` (dấu `;`). Contract gọi `python3`: dùng Python thật trong venv; script setup tạo tên lệnh này cục bộ, không đổi contract.
 - Headless: `python3 -m chonoi.headless --mode gather|quan --seed 1 --ticks 600 --out out.jsonl`
 - Chơi thử trên trình duyệt: `python3 -m chonoi.live --mode gather|quan` (mở địa chỉ in ra; WASD, E, Space, R)
 
@@ -26,4 +28,5 @@
 - Sáng tạo thêm được khuyến khích nhưng phải tắt ở headless (xem README, mục "Tự do sáng tạo").
 
 ## Skills / hooks của nhóm
-- (Ghi tên và khi nào dùng; tối thiểu 2 skill/hook/command nhóm tự viết, đặt ở `.agents/skills/` hoặc tương đương.)
+- [run-phase-qa](.agents/skills/run-phase-qa/SKILL.md): chạy suite trước tích hợp/tag, lưu exit code và log thật, phân biệt lỗi Windows với lỗi luật.
+- [verify-phase-proof](.agents/skills/verify-phase-proof/SKILL.md): chạy lại fixture lát 1, so byte với bằng chứng gốc và hai lần cùng seed, cập nhật link verification và giả định chờ PO.
