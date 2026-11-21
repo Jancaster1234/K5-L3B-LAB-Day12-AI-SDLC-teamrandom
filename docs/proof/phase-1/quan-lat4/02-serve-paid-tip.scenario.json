@@ -1,0 +1,17 @@
+{
+  "quan": {
+    "player": {"pos": [9, 2]},
+    "hand": "ca_loc_nuong_trui",
+    "reputation": 3.0,
+    "customers": [
+      {
+        "id": "C1",
+        "table_id": "T1",
+        "dish_id": "ca_loc_nuong_trui",
+        "state": "waiting",
+        "patience_ticks_left": 3000,
+        "patience_ticks_total": 3600
+      }
+    ]
+  }
+}
