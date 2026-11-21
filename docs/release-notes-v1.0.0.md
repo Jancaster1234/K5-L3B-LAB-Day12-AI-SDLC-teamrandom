@@ -8,7 +8,7 @@ Phiên bản phát hành chính thức **v1.0.0** của game **Quán Ăn Chợ N
 
 ### Phase 3 — Test Contract v1.2: Độ tươi & Kho cá thể
 * **Breaking Change: Chuyển đổi kho đếm sang kho cá thể**:
-  - File kho, giỏ lặn (`gather.hold`), kho quán (`quan.stock`), và bàn giao ca (`gather_end.inventory`) chuyển sang định dạng cá thể: `{"items": [{"id": ..., "kind": ..., "fresh": ...}]}`. Cấu trúc kho đếm cũ bị từ chối với mã lỗi 2 (xem chi tiết tại [ADR-0001](file:///d:/AI20K/Lab12/K5-L3B-LAB-Day12-AI-SDLC-teamrandom/docs/adr/0001-kho-ca-the-v12.md)).
+  - File kho, giỏ lặn (`gather.hold`), kho quán (`quan.stock`), và bàn giao ca (`gather_end.inventory`) chuyển sang định dạng cá thể: `{"items": [{"id": ..., "kind": ..., "fresh": ...}]}`. Cấu trúc kho đếm cũ bị từ chối với mã lỗi 2 (xem chi tiết tại [ADR-0001](https://github.com/Jancaster1234/K5-L3B-LAB-Day12-AI-SDLC-teamrandom/blob/main/docs/adr/0001-kho-ca-the-v12.md)).
   - Các trường liên quan (`reserved`, `cook_started.items`, `monster_hit.lost`, `faint.lost`) đồng bộ sử dụng danh sách cá thể.
   - Giá món ăn chốt lúc bắt đầu nấu phụ thuộc vào độ tươi: `base_price = floor(giá niêm yết × trung bình fresh / 100)`.
 * **Cơ chế độ tươi (`chonoi/fresh.py`)**:
