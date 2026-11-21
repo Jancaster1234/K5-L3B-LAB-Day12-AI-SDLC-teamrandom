@@ -60,31 +60,32 @@ class QuanFlow(unittest.TestCase):
         f.wait_for("customer_arrived", Q["first_customer_tick"] + 1)
         arrived = f.first("customer_arrived")
         self.assertEqual(arrived["data"]["dish_id"], DISH)  # món duy nhất nấu được từ kho
-        cid = arrived["data"]["customer_id"]
+        cid = arrived["data"]["order_id"]
         self.assertEqual(f.s.sim.customers[0]["reserved"], MENU[DISH]["recipe"])
 
         f.step(interact=True)
         self.assertEqual(f.events[-1]["name"], "cook_started")
-        self.assertEqual(f.events[-1]["data"], {"stove_id": "B1", "dish_id": DISH})
+        self.assertEqual(f.events[-1]["data"], {"stove_id": "B1", "order_id": cid, "dish_id": DISH,
+                                                 "items": MENU[DISH]["recipe"], "base_price": MENU[DISH]["price"]})
         self.assertEqual(f.s.sim.stock, {})
         self.assertEqual(f.s.sim.customers[0]["reserved"], {})  # phần giữ chỗ đã vào nồi
 
         f.wait_for("dish_ready", int(MENU[DISH]["cook_s"] * 60) + 1)
         f.step(interact=True)
         self.assertEqual(f.events[-1]["name"], "dish_picked")
-        self.assertEqual(f.s.sim.hand, DISH)
+        self.assertEqual(f.s.sim.hand, {"order_id": cid, "dish_id": DISH, "base_price": MENU[DISH]["price"]})
 
         f.walk_to(TABLE)
         f.step(interact=True)
         served = f.first("served")
-        self.assertEqual(served["data"], {"customer_id": cid, "table_id": "T1", "dish_id": DISH})
+        self.assertEqual({k: served["data"][k] for k in ("order_id", "table_id", "dish_id")}, {"order_id": cid, "table_id": "T1", "dish_id": DISH})
         self.assertIsNone(f.s.sim.hand)
 
         f.wait_for("paid", int(Q["eat_s"] * 60) + 1)
         paid = f.first("paid")
         price = MENU[DISH]["price"]
-        tip = round(price * Q["tip_rate"])  # phục vụ nhanh -> còn > tip_min_patience_ratio
-        self.assertEqual((paid["data"]["price"], paid["data"]["tip"]), (price, tip))
+        tip = math.floor(price * Q["tip_rate"] + 1e-9)  # PRD-0: floor  # phục vụ nhanh -> còn > tip_min_patience_ratio
+        self.assertEqual((paid["data"]["base_price"], paid["data"]["tip"]), (price, tip))
         self.assertEqual(f.s.sim.money, price + tip)
         self.assertAlmostEqual(f.s.sim.reputation, Q["reputation_initial"] + Q["tip_reputation"])
         self.assertNotIn("customer_left", f.names())

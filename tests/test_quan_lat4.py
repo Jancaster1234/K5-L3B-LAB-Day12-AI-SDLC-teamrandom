@@ -72,7 +72,7 @@ class TestQuanLat4(unittest.TestCase):
         self.assertIn("dish_picked", names)
         pick_ev = next(e for e in evs if e["name"] == "dish_picked")
         self.assertEqual(pick_ev["data"]["dish_id"], "ca_loc_nuong_trui")
-        self.assertEqual(sess.sim.hand, "ca_loc_nuong_trui")
+        self.assertEqual(sess.sim.hand, {"order_id": "C1", "dish_id": "ca_loc_nuong_trui", "base_price": 60})  # PRD-0: hand là payload món
         self.assertEqual(b1["state"], "idle")
         self.assertIsNone(b1["dish"])
 
@@ -80,7 +80,7 @@ class TestQuanLat4(unittest.TestCase):
         """Phục vụ khách kiên nhẫn cao (>=50%): ăn xong trả tiền + boa 20% + tăng 0.2 uy tín."""
         scenario = {
             "player": {"pos": [9, 2]},  # Đứng sát bàn T1 [9, 2]
-            "hand": "ca_loc_nuong_trui",
+            "hand": {"order_id": "C1", "dish_id": "ca_loc_nuong_trui", "base_price": 60},
             "reputation": 3.0,
             "customers": [
                 {
@@ -88,8 +88,8 @@ class TestQuanLat4(unittest.TestCase):
                     "table_id": "T1",
                     "dish_id": "ca_loc_nuong_trui",
                     "state": "waiting",
-                    "patience_ticks_left": 3000,
-                    "patience_ticks_total": 3600,  # 3000/3600 = 83.3% >= 50% -> đủ điều kiện boa
+                    "order_status": "assigned",  # món của đơn đang trên tay
+                    "patience_ticks_left": 3000,  # sau bước 1 còn 2999/3600 >= 50% -> đủ điều kiện boa
                 }
             ],
         }
@@ -103,14 +103,15 @@ class TestQuanLat4(unittest.TestCase):
         self.assertIn("served", names)
         served_ev = next(e for e in evs if e["name"] == "served")
         self.assertEqual(served_ev["data"]["table_id"], "T1")
-        self.assertEqual(served_ev["data"]["customer_id"], "C1")
+        self.assertEqual(served_ev["data"]["order_id"], "C1")
         self.assertEqual(served_ev["data"]["dish_id"], "ca_loc_nuong_trui")
         self.assertIsNone(sess.sim.hand)
 
         c1 = sess.sim.customers[0]
         self.assertEqual(c1["state"], "eating")
         self.assertEqual(c1["eat_ticks_left"], 600)  # 10s * 60
-        self.assertTrue(c1["tipped"])
+        self.assertEqual(c1["tip"], 12)  # floor(60 * 0.2)
+        self.assertEqual(c1["order_status"], "served")
 
         # Khách ăn trong 599 tick tiếp theo
         li.set(interact=False)
@@ -123,7 +124,7 @@ class TestQuanLat4(unittest.TestCase):
         names = [e["name"] for e in evs]
         self.assertIn("paid", names)
         paid_ev = next(e for e in evs if e["name"] == "paid")
-        self.assertEqual(paid_ev["data"]["price"], 60)
+        self.assertEqual(paid_ev["data"]["base_price"], 60)
         self.assertEqual(paid_ev["data"]["tip"], 12)
         self.assertEqual(paid_ev["data"]["amount"], 72)
         self.assertEqual(sess.sim.money, 72)
@@ -135,7 +136,7 @@ class TestQuanLat4(unittest.TestCase):
         """Phục vụ khách kiên nhẫn thấp (<50%): ăn xong trả tiền nhưng không có boa, uy tín giữ nguyên."""
         scenario = {
             "player": {"pos": [9, 2]},
-            "hand": "goi_bong_sung",
+            "hand": {"order_id": "C2", "dish_id": "goi_bong_sung", "base_price": 40},
             "reputation": 3.0,
             "customers": [
                 {
@@ -143,8 +144,8 @@ class TestQuanLat4(unittest.TestCase):
                     "table_id": "T1",
                     "dish_id": "goi_bong_sung",
                     "state": "waiting",
-                    "patience_ticks_left": 1000,
-                    "patience_ticks_total": 3600,  # 1000/3600 = 27.7% < 50%
+                    "order_status": "assigned",
+                    "patience_ticks_left": 1000,  # 999/3600 = 27.7% < 50%
                 }
             ],
         }
@@ -154,7 +155,7 @@ class TestQuanLat4(unittest.TestCase):
         li.set(interact=True)
         sess.step(li.advance())
         c2 = sess.sim.customers[0]
-        self.assertFalse(c2["tipped"])
+        self.assertEqual(c2["tip"], 0)
 
         # Cho khách ăn xong
         li.set(interact=False)
@@ -165,26 +166,32 @@ class TestQuanLat4(unittest.TestCase):
         names = [e["name"] for e in evs]
         self.assertIn("paid", names)
         paid_ev = next(e for e in evs if e["name"] == "paid")
-        self.assertEqual(paid_ev["data"]["price"], 40)
+        self.assertEqual(paid_ev["data"]["base_price"], 40)
         self.assertEqual(paid_ev["data"]["tip"], 0)
         self.assertEqual(paid_ev["data"]["amount"], 40)
         self.assertEqual(sess.sim.money, 40)
         self.assertAlmostEqual(sess.sim.reputation, 3.0, places=2)
 
     def test_carry_limit_cannot_pick_second_dish(self):
-        """Đang cầm món trong tay thì không thể bốc thêm món từ bếp khác (carry_limit: 1)."""
+        """Đang cầm món trong tay thì không thể bốc thêm món từ bếp (carry_limit: 1).
+        Khung chỉ có 1 bếp + 1 bàn nên không dựng được 2 đơn từ scenario: đặt tay trực tiếp trên sim."""
         scenario = {
             "player": {"pos": [2, 8]},
-            "hand": "goi_bong_sung",
-            "stoves": [{"id": "B1", "state": "ready", "dish": "ca_loc_nuong_trui"}],
+            "stoves": [{"id": "B1", "state": "ready",
+                        "dish": {"order_id": "C1", "dish_id": "ca_loc_nuong_trui", "base_price": 60}}],
+            "customers": [{"id": "C1", "table_id": "T1", "dish_id": "ca_loc_nuong_trui",
+                           "state": "waiting", "order_status": "assigned"}],
         }
         sess = self._make_session(scenario)
+        other = {"order_id": "C9", "dish_id": "goi_bong_sung", "base_price": 40}
+        sess.sim.hand = dict(other)
         li = LiveInputs()
 
         li.set(interact=True)
         evs = sess.step(li.advance())
         self.assertFalse(any(e["name"] == "dish_picked" for e in evs))
-        self.assertEqual(sess.sim.hand, "goi_bong_sung")
+        self.assertEqual(sess.sim.hand, other)
+        self.assertEqual(sess.sim.stoves[0]["state"], "ready")
 
     def test_interact_tie_break_stove_before_table(self):
         """Nếu bếp và bàn cùng khoảng cách, bếp được ưu tiên trước bàn."""

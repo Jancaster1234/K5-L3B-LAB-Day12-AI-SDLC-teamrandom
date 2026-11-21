@@ -1,7 +1,7 @@
 {
   "quan": {
     "player": {"pos": [9, 2]},
-    "hand": "goi_bong_sung",
+    "hand": {"order_id": "C2", "dish_id": "goi_bong_sung", "base_price": 40},
     "reputation": 3.0,
     "customers": [
       {
@@ -9,8 +9,8 @@
         "table_id": "T1",
         "dish_id": "goi_bong_sung",
         "state": "waiting",
-        "patience_ticks_left": 1000,
-        "patience_ticks_total": 3600
+        "order_status": "assigned",
+        "patience_ticks_left": 1000
       }
     ]
   }

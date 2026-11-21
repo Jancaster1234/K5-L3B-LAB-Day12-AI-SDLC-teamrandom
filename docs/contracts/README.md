@@ -1,6 +1,6 @@
 # Hợp đồng tích hợp — Phase 1 (contract v1.0)
 
-> Người giữ: Integrator (Jancaster1234) · **⚠ PRD-0** = tên/trường do PRD-0 quyết định; PO (HaiVuQ) chưa đối chiếu xong, giả định hiện dùng ở `docs/clarify.md` #1–#10. PRD-0 thắng nếu khác. Đổi mục nào thì báo cả nhóm trên Discord và ghi lý do (ADR ở `docs/adr/`).
+> Người giữ: Integrator (Jancaster1234) · Đã đối chiếu PRD-0 (PO HaiVuQ, `docs/clarify.md` #1–#10); **⚠** = code chưa khớp PRD-0. PRD-0 thắng nếu khác. Đổi mục nào thì báo cả nhóm trên Discord và ghi lý do (ADR ở `docs/adr/`).
 > Số liệu luôn đọc từ `game.contract.json` (`tuning.*`), không hard-code.
 
 ## 1. File kho (PRD-0 mục G) — đã cố định bởi `chonoi/inventory.py`
@@ -28,24 +28,19 @@ Mỗi lát chỉ thêm **một dòng gọi** vào `step()`; logic nằm trong h�
 | 5 | `catch` | `_catch(events)` | lát 2 · ndhai255 |
 | 6 | Hết giờ → `_finish("time")` | có sẵn | khung |
 
-Giỏ (`self.hold`): mảng id theo thứ tự nhặt, **cuối mảng = mới nhất** (LIFO). Chỉ thêm qua `_hold_add(kind, n, events) -> int` (lát 2 viết): thêm tối đa đến `hold_capacity`, trả số đã thêm, phát `hold_full` khi không thêm đủ. ⚠ PRD-0: thêm một phần hay từ chối cả lượt khi giỏ thiếu chỗ.
+Giỏ (`self.hold`): mảng id theo thứ tự nhặt, **cuối mảng = mới nhất** (LIFO). Chỉ thêm qua `_hold_add(kind, n, events) -> int` (lát 2 viết): PRD-0 (clarify #2): **nhận cả lượt hoặc không nhận gì** — thiếu chỗ thì phát `hold_full`, nút giữ nguyên, đàn cá ở lại và không đặt hồi chiêu; `catch` hụt không sự kiện, không hồi chiêu (clarify #8). ⚠ code lát 2 còn nhận một phần.
 
-### `chonoi/sim/quan.py`
+### `chonoi/sim/quan.py` — theo PRD-0 mục F (clarify #3)
 | # | Bước | Hàm | Chủ |
 |---|---|---|---|
-| 1 | Đồng hồ | có sẵn | khung |
-| 2 | Giảm kiên nhẫn khách `waiting`; về 0 → `customer_left`, nhả giữ chỗ, uy tín `+= left_reputation_delta` | `_tick_patience(events)` | lát 3 · HaiVuQ |
-| 3 | Bếp nấu: `cook_ticks_left` −1; về 0 → `ready`, `dish_ready` | `_tick_stoves(events)` | lát 4 · Hiệu |
-| 4 | Khách ăn: `eat_ticks_left` −1; về 0 → `paid` (tiền + boa, uy tín), rời bàn | `_tick_eating(events)` | lát 4 |
-| 5 | Đi lại + chặn biên | `_move` | khung |
-| 6 | Tối đa **một** interact; chọn đối tượng gần nhất trong `interact_radius`, hòa thì **bếp trước bàn**, rồi id nhỏ | `_interact(events)` | lát 4 |
-| 7 | Khách mới theo lịch (`first_customer_tick`, rồi mỗi `customer_interval_s`), chọn món nấu được, giữ chỗ; không món nào → `no_dish` | `_spawn_customers(events)` | lát 3 |
-| 8 | Hết giờ → `quan_end` | có sẵn | khung |
+| 1 | `phase_tick` +1; giảm đồng hồ ca, `cook_ticks_left`, `eat_ticks_left`, `patience_ticks_left` (khách `waiting`); món đã `ready` từ đầu bước: `ready_ticks` +1 | `step()` | tích hợp |
+| 2 | Bếp `cooking` về 0 → `ready` (`ready_ticks = 0`), `dish_ready` | `step()` | lát 4 |
+| 3 | Đi lại, rồi tối đa **một** interact: đối tượng gần nhất trong `interact_radius` (hòa: **bếp trước bàn**, rồi id nhỏ). Đối tượng được chọn không dùng được thì **bỏ lượt**. Phục vụ đúng tick kiên nhẫn về 0 hoặc hết ca vẫn hợp lệ | `_move`, `_interact` → `_use_stove` / `_use_table` | lát 4 |
+| 4 | Duyệt bàn theo id: ăn xong → `paid(finished_eating)`; còn giờ mà kiên nhẫn 0 → `customer_left(patience)` + `left_reputation_delta`; **hết ca**: đang ăn → `paid(closing)`, đang chờ → `customer_left(closing)` không trừ uy tín. Khách rời: nhả giữ chỗ, hủy món của đơn trên bếp/tay. Hết ca → `quan_end` | `_resolve_tables`, `_pay`, `_leave` | lát 3 + 4 |
+| 5 | Còn giờ: khách mới theo lịch `phase_tick` (`first_customer_tick`, mỗi `customer_interval_s`); hết bàn thì bỏ lượt; bàn trống id nhỏ; chọn đều theo seed trong các món nấu được; không món nào → `no_dish` | `_spawn_customers` | lát 3 |
 
-**Chốt khi tích hợp (Integrator, clarify #3):** kiên nhẫn → bếp → ăn → đi → interact → khách mới, theo gợi ý `TODO` của khung ("giảm kiên nhẫn / nấu / ăn"). ⚠ PRD-0 mục F: nếu khác, chỉ đổi thứ tự dòng gọi, không đổi hàm.
-
-Hàm dùng chung do lát 3 viết, lát 4 gọi: `_available() -> dict` (kho − tổng giữ chỗ), `_release(customer)` (nhả giữ chỗ), `_cookable_dishes()`.
-Bếp idle chọn món (`_dish_to_cook`): (1) khách chờ còn giữ chỗ đủ công thức → nấu bằng phần giữ chỗ đó; (2) khách chờ mà số món đang nấu/bưng chưa đủ → nấu bằng kho khả dụng; (3) không ai cần → món đầu tiên nấu được. **Không bao giờ lấy nguyên liệu đang giữ cho khách khác.** Nấu: trừ `stock` theo công thức, nhả `reserved` của khách đó.
+Hàm dùng chung: `_available()` (kho − tổng giữ chỗ), `_cookable_dishes()`.
+Bếp `idle` nấu cho đơn `reserved` có `(order_tick, id bàn)` nhỏ nhất, tiêu đúng phần giữ chỗ của đơn đó (`items`), đơn → `assigned`. Không có đơn `reserved` → không nấu được (bỏ lượt).
 
 ## 3. Trạng thái (snapshot) — UI chỉ đọc, không ghi
 
@@ -55,23 +50,24 @@ Trường chung do runner thêm: `tick, mode, phase, state, time_left_ticks, mon
 
 **Quan**: `player{pos}`, `stock`, `hand`, `stoves`, `tables[{id, pos, customer_id}]`, `customers`.
 
-Bếp (khung đã cố định): `{id, pos, state: "idle"|"cooking"|"ready", dish, cook_ticks_left, ready_ticks}`.
+Bếp: `{id, pos, state: "idle"|"cooking"|"ready", dish, cook_ticks_left, ready_ticks}`; `dish` = payload món hoặc `null`.
 
-**Khách** — dùng chung lát 3 (tạo) và lát 4 (phục vụ). Tên trường khớp UI `chonoi/web/index.html`:
-| Trường | Kiểu | Ai ghi |
-|---|---|---|
-| `id` | `"C1"`, `"C2"`… cấp bằng `self.ids.new("C")` | lát 3 |
-| `table_id` | id bàn | lát 3 |
-| `dish_id` | khóa trong `tuning.menu` | lát 3 |
-| `dish` | bí danh của `dish_id` (giữ cho tương thích) | lát 3 |
-| `state` | `"waiting"` → `"eating"`; nạp scenario chấp nhận thêm `"assigned"` (món đã nấu/bưng sẵn), xử lý như `waiting` (⚠ PRD-0) | lát 3 tạo, lát 4 chuyển |
-| `patience_ticks_left`, `patience_ticks_total` | cả hai = `patience_s * 60` lúc đến; tỉ lệ `left/total` dùng xét boa | lát 3 |
-| `reserved` | `{nguyên liệu: số}` theo `recipe` | lát 3 giữ, lát 4 tiêu khi `cook_started` |
-| `eat_ticks_left` | `eat_s * 60` khi `served` | lát 4 |
-| `tipped` | chốt khi `served`: `left/total ≥ tip_min_patience_ratio` | lát 4 |
-| `price`, `tip` (tùy chọn, scenario) | nếu có thì dùng thay cho `menu.price` và `round(price * tip_rate)` khi `paid` | lát 4 |
+**Payload món** (`hand`, `stove.dish`, PRD-0 mục D): `{order_id, dish_id, base_price}` hoặc `null`; `order_id` = id khách. Tay giữ tối đa `carry_limit` (1).
 
-`hand`: `null` hoặc id món đang bưng (chuỗi), tối đa `carry_limit`. ⚠ PRD-0.
+**Khách = một đơn** (PRD-0 mục D, clarify #4). Snapshot đúng các trường sau:
+| Trường | Ý nghĩa |
+|---|---|
+| `id` | `"C1"`, `"C2"`… (`self.ids.new("C")`); cũng là `order_id` |
+| `table_id`, `dish_id` | bàn và món của đơn |
+| `state` | `"waiting"` → `"eating"` |
+| `order_status` | `"reserved"` (giữ nguyên liệu) → `"assigned"` (món ở bếp/tay) → `"served"`; hoặc `"unfulfillable"` (chờ, không giữ, không món — chỉ từ scenario) |
+| `order_tick` | `phase_tick` lúc đến |
+| `patience_ticks_left` | đầy = `patience_s * 60` lúc đến, giảm từ bước sau |
+| `eat_ticks_left` | `eat_s * 60` khi `served` |
+| `reserved` | `{nguyên liệu: số}` đúng công thức khi `reserved`, `{}` ở trạng thái khác |
+| `base_price`, `tip` | giá món; boa chốt khi `served`: `floor(base_price × tip_rate)` nếu `patience_ticks_left / (patience_s*60) ≥ tip_min_patience_ratio`, không thì 0 |
+
+Scenario `customers[]` (clarify #10): thiếu `reserved` ở đơn `reserved` thì cấp theo `(order_tick, id bàn)`; `assigned` phải có đúng một món ở bếp hoặc tay khớp đơn; `eating` phải `served`, `eat_ticks_left > 0`, có `base_price`, `tip`. Mã 2 khi giữ khác công thức / quá kho, bếp và tay cùng đơn, món không khớp đơn, bếp `cooking` có timer ≤ 0.
 
 **Lệnh UI gửi vào**: chỉ input khung `move [x, d|z]`, `interact`, `catch` (`chonoi/inputs.py`, `BUTTONS_V10`). UI không gọi hàm sim.
 
@@ -79,30 +75,27 @@ Bếp (khung đã cố định): `{id, pos, state: "idle"|"cooking"|"ready", dis
 
 Dòng JSONL: `{"type":"event","tick","phase","name","data"}`; phát theo đúng thứ tự xử lý trong `step()`.
 
-| Tên | Ai phát | `data` (⚠ PRD-0 chốt tên trường) |
+| Tên | Ai phát | `data` (theo PRD-0 mục E, clarify #1) |
 |---|---|---|
-| `dive`, `surface` | lát 1 | `{pos}` |
-| `oxygen_empty` | lát 1 | `{}` |
-| `choke` | lát 1 | `{hp}` |
-| `faint` | lát 1 | `{}`, theo sau là `gather_end` `fainted` |
-| `gather` | lát 2 | `{node_id, kind, count}` |
+| `dive`, `surface` | lát 1 | `{pos}` ✅ |
+| `oxygen_empty` | lát 1 | `{oxygen_ticks: 0}` ✅ |
+| `choke` | lát 1 | `{hp}` ✅ |
+| `faint` | lát 1 | `{cause: "choke", lost: [kind theo LIFO], hp: 0}` ✅, theo sau là `gather_end` `fainted` |
+| `gather` | lát 2 | `{node_id, kind, amount}` (⚠ code lát 2 còn `count`) |
 | `node_regrown` | khung | `{node_id}` ✅ |
-| `fish_caught` | lát 2 | `{fish_id, kind, count}` |
-| `hold_full` | lát 2 | `{kind}` |
+| `fish_caught` | lát 2 | `{fish_id, kind, yield}` (⚠ code lát 2 còn `count`) |
+| `hold_full` | lát 2 | `{action: "gather"\|"catch", node_id\|fish_id, required, free}` (⚠ code lát 2 còn `{kind}`) |
 | `gather_end` | khung | `{reason, inventory:{items}}` ✅ |
-| `customer_arrived` ⚠ | lát 3 | `{customer_id, table_id, dish_id}` |
-| `no_dish` | lát 3 | `{}` |
-| `customer_left` | lát 3 | `{customer_id, table_id}` |
-| `cook_started` | lát 4 | `{stove_id, dish_id}` |
-| `dish_ready` | lát 4 | `{stove_id, dish_id}` |
-| `dish_picked` | lát 4 | `{stove_id, dish_id}` |
-| `served` | lát 4 | `{customer_id, table_id, dish_id}` |
-| `paid` | lát 4 | `{customer_id, table_id, dish_id, price, tip, amount}` (`amount = price + tip`) |
+| `customer_arrived` | lát 3 | `{order_id, table_id, dish_id}` ✅ |
+| `no_dish` | lát 3 | `{}` ✅ |
+| `customer_left` | lát 3 | `{order_id, table_id, reason: "patience"\|"closing", reputation}` ✅ (`reputation` = uy tín sau khi đổi, giả định clarify #11) |
+| `cook_started` | lát 4 | `{stove_id, order_id, dish_id, items, base_price}` ✅ (`items` sắp theo kind) |
+| `dish_ready`, `dish_picked` | lát 4 | `{stove_id, order_id, dish_id}` ✅ |
+| `served` | lát 4 | `{order_id, table_id, dish_id, patience_ticks_left, base_price, tip}` ✅ |
+| `paid` | lát 4 | `{order_id, table_id, base_price, tip, amount, reason: "finished_eating"\|"closing"}` ✅ |
 | `quan_end` | khung | `{reason, money, earned, shift_earned, reputation}` ✅ |
 
-✅ = khung đã cố định. Người nghe: runner (ghi JSONL), UI (`chonoi.live` hiện 6 sự kiện cuối), QA (test).
-
-Mọi sự kiện có món dùng **`dish_id`** (không dùng `dish`), khớp trường khách và UI. Bản `docs/contracts/quan.md` (lát 4) đã gộp vào file này.
+✅ = code đã khớp. Người nghe: runner (ghi JSONL), UI (`chonoi.live` hiện 6 sự kiện cuối), QA (test).
 
 ## 5. Quy ước chung
 - Ngẫu nhiên chỉ qua `self.rng` (`Streams`); không `random`, không đồng hồ hệ thống.

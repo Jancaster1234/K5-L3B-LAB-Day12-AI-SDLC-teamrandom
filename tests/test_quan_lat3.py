@@ -46,7 +46,7 @@ class SpawnAndReserve(unittest.TestCase):
         self.assertEqual(len(arr), 1)
         self.assertEqual(arr[0]["tick"], FIRST_TICK)
         self.assertEqual(arr[0]["data"], {
-            "customer_id": "C1",
+            "order_id": "C1",
             "table_id": "T1",
             "dish_id": "ca_loc_nuong_trui",
         })
@@ -114,7 +114,8 @@ class PatienceAndLeave(unittest.TestCase):
         evs_step3 = s.step(InputPlayer([]).advance(2))
         self.assertEqual(names(evs_step3), ["customer_left"])
         self.assertEqual(evs_step3[0]["tick"], 3)
-        self.assertEqual(evs_step3[0]["data"], {"customer_id": "C1", "table_id": "T1"})
+        self.assertEqual(evs_step3[0]["data"], {"order_id": "C1", "table_id": "T1", "reason": "patience",
+                                                 "reputation": Q["reputation_initial"] + Q["left_reputation_delta"]})
         self.assertEqual(s.sim.customers, [])
         self.assertEqual(s.sim._available(), {"ca_loc": 1})
         self.assertAlmostEqual(s.sim.reputation, Q["reputation_initial"] + Q["left_reputation_delta"])
@@ -146,6 +147,8 @@ class PatienceAndLeave(unittest.TestCase):
                 "state": "eating",
                 "patience_ticks_left": 2,
                 "eat_ticks_left": 100,
+                "base_price": 60,
+                "tip": 0,
             }],
         }
         s, evs = play_quan(sc, 5)
@@ -157,8 +160,8 @@ class PatienceAndLeave(unittest.TestCase):
         s, evs = play_quan({"stock": {"ca_loc": 1}}, FIRST_TICK + PATIENCE_TICKS)
         ev_3720 = [e for e in evs if e["tick"] == FIRST_TICK + PATIENCE_TICKS]
         self.assertEqual([e["name"] for e in ev_3720], ["customer_left", "customer_arrived"])
-        self.assertEqual(ev_3720[0]["data"]["customer_id"], "C1")
-        self.assertEqual(ev_3720[1]["data"]["customer_id"], "C2")
+        self.assertEqual(ev_3720[0]["data"]["order_id"], "C1")
+        self.assertEqual(ev_3720[1]["data"]["order_id"], "C2")
         self.assertEqual(len(s.sim.customers), 1)
         self.assertEqual(s.sim.customers[0]["id"], "C2")
         self.assertEqual(s.sim.customers[0]["reserved"], {"ca_loc": 1})
@@ -184,8 +187,10 @@ class ScenarioValidationAndHeadless(unittest.TestCase):
             out = w.path("o.jsonl")
             sc = write_json(w.path("sc.json"), {
                 "quan": {
-                    "hand": "ca_loc_nuong_trui",
-                    "customers": [{"id": "C1", "table_id": "T1", "dish_id": "ca_loc_nuong_trui", "state": "waiting"}],
+                    # PRD-0 mục D: hand là payload món; đơn có món trên tay là "assigned", reserved rỗng
+                    "hand": {"order_id": "C1", "dish_id": "ca_loc_nuong_trui", "base_price": 60},
+                    "customers": [{"id": "C1", "table_id": "T1", "dish_id": "ca_loc_nuong_trui", "state": "waiting",
+                                   "order_status": "assigned"}],
                 }
             })
             code, err = run_headless("--mode", "quan", "--seed", "1", "--ticks", "1", "--scenario", sc, "--out", out)

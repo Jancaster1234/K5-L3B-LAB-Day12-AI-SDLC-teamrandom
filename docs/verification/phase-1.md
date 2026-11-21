@@ -14,10 +14,13 @@
 | QA — tất định từng byte của 4 fixture lát 1 | Mỗi fixture chạy 2 lần seed 1; so byte với blob bằng chứng tại HEAD, SHA-256 trong log | [Script replay](../../.agents/skills/verify-phase-proof/scripts/replay_lat1.py), [Kết quả 4/4](../proof/phase-1/qa-lat5/replay-output.txt) | Đạt; so blob Git tránh CRLF do checkout Windows |
 | QA — hồi quy, giao tiếp gather → kho → quan | Toàn suite: 44 test gồm 12 test lát 1, live server và smoke tích hợp kho | [Test tích hợp hiện có](../../tests/test_smoke_p1.py), [Log QA 44/44](../proof/phase-1/qa-lat5/test-output.txt) | Đạt trong phạm vi suite; chưa chứng minh toàn bộ luật quán |
 | Harness AI — 2 skill của nhóm | Kiểm tra frontmatter bằng quick_validate; thực thi script replay | [run-phase-qa](../../.agents/skills/run-phase-qa/SKILL.md), [verify-phase-proof](../../.agents/skills/verify-phase-proof/SKILL.md), [Log kiểm skill 1](../proof/phase-1/qa-lat5/skill-validation.txt), [Log kiểm skill 2](../proof/phase-1/qa-lat5/skill-validation-proof.txt) | Đạt kiểm tra cấu trúc; script replay chạy thành công |
-| Lát 4 — bếp, bàn, `served`, `paid`, boa, uy tín, `quan_end` | `tests/test_quan_lat4.py` sau tích hợp | (bằng chứng lát 4 bổ sung sau) | Chưa có bằng chứng riêng |
-| HUD đầy đủ | Chơi thử `python3 -m chonoi.live` | (bổ sung sau) | Chưa làm |
+| Lát 4 — bếp (`cook_started`/`dish_ready`/`dish_picked`), phục vụ (`served`), trả tiền (`paid`), boa `floor`, uy tín, `quan_end` | 4 fixture headless + `tests/test_quan_lat4.py` | [Bằng chứng lát 4](../proof/phase-1/quan-lat4/README.md) | Đạt theo PRD-0 (output tạo lại sau khi viết lại quán) |
+| Quán theo PRD-0 — `order_id`/`order_status`, payload `hand`/`stove.dish`, thứ tự bước, bỏ lượt interact, đóng ca (`closing`), hủy món khi khách rời, mâu thuẫn scenario mã 2 | 13 test `tests/test_quan_prd0.py` + `tests/test_quan_integration.py` | [Test PRD-0](../../tests/test_quan_prd0.py), [Log 91 test](../proof/phase-1/quan-lat4/test-output.txt) | Đạt theo clarify #3, #4, #5, #9, #10; giả định ở clarify #11 |
+| Lát 2 theo PRD-0 — `amount`/`yield`, `hold_full` mới, nhận cả lượt hoặc không, `catch` hụt không hồi chiêu | — | — | **Chưa đạt** (clarify #1, #2, #8; Đức Hải đang sửa) |
+| HUD đầy đủ | Chơi thử `python3 -m chonoi.live` | — | Chưa làm ở Phase 1 (cửa sổ thử của khung vẫn chạy, đã sửa hiển thị món trên bếp theo payload) |
 
 ## Đánh giá ngắn
+- QA lead (Jancaster1234, nhận từ tuannguyen-cell): sau tag `phase-1`, quán viết lại theo PRD-0; 91/91 test đạt; bằng chứng lát 3, 4 tạo lại. Còn lát 2 theo PRD-0 và HUD.
 - QA: Nguyễn Văn Tuấn (`tuannguyen-cell`), ngày 2026-11-21, Windows / Python 3.13.3. Nhánh `qa-lat5`, nền kiểm tra `b1f71ee` (code lát 1 `d150448`). [Tổng hợp QA](../proof/phase-1/qa-lat5/README.md), [bằng chứng tác giả lát 1](../proof/phase-1/gather-lat1/README.md).
 - 44/44 test đạt; 4/4 fixture khớp bản Git và hai lần chạy; chưa xác nhận đạt toàn Phase 1. Nhãn trên là mô tả luật, chưa phải mã AC chính thức từ lab board.
 - Cần PO đối chiếu [clarify #6, #7](../clarify.md) và tên trường sự kiện trong [contract nháp](../contracts/README.md) với PRD-0. Kết quả chạy đúng theo giả định hiện tại không thay thế việc xác nhận yêu cầu.
