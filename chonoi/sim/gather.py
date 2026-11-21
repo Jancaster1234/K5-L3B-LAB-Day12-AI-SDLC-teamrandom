@@ -13,15 +13,16 @@ Nhóm viết tiếp (đúng thứ tự một bước trong PRD mục 13.8, "Gath
       - Máu về 0 -> ngất (faint, gather_end reason `fainted`, mất toàn bộ giỏ, kho rỗng)
       - sự kiện dive / surface / oxygen_empty / choke / faint
       - giỏ: thứ tự nhặt (LIFO), sức chứa hold_capacity
-  TODO(nhóm, lát 2): hái + bắt cá + cập bến + kho
+  XONG (lát 2, ndhai255): hái + bắt cá + cập bến + kho — `_harvest`, `_catch`, `_hold_add`
       - hái nút ở mặt nước (gather, hold_full), nút mọc lại (node_regrown đã có phần đếm ngược)
       - bắt đàn cá bằng `catch` (fish_caught, hold_full, hồi chiêu catch_cd_ticks, chỉ khi dưới nước)
       - cập bến xét TRƯỚC hái (đã có); ghi kho đúng một lần do runner lo
+      - giả định chờ PO: docs/clarify.md #2 (giỏ thiếu chỗ -> nhận một phần), #6 (vung hụt vẫn hồi chiêu)
 Các tính năng của phase sau chưa nằm trong khung này.
 """
 
 import math
-
+    
 from ..ids import sort_by_id
 from ..inventory import hold_to_items
 from .ramp import ramp_velocity
@@ -117,15 +118,63 @@ class GatherSim:
             if self._in_dock():
                 self._finish("docked", events)
                 return events
-            # TODO(nhóm, lát 2): chỉ khi ở mặt nước: hái nút `ready` gần nhất trong interact_radius
-            #   (id nhỏ khi bằng nhau): gather / hold_full; đặt regrow_ticks cho nút.
+            self._harvest(events)
         # 4. bắt cá
         if inp.pressed("catch"):
-            pass  # TODO(nhóm, lát 2): chỉ khi catch_cd_ticks == 0 và dưới nước: fish_caught / hold_full.
+            self._catch(events)
         # 5. hết giờ
         if self.time_left_ticks <= 0:
             self._finish("time", events)
         return events
+
+    # --- lát 2: hái + bắt cá + giỏ (chủ: ndhai255) -------------------------------
+    def _nearest(self, entities, radius):
+        """Thực thể gần nhất trong `radius`; hòa khoảng cách thì id nhỏ (sort_by_id + min ổn định)."""
+        best, best_d = None, None
+        for e in sort_by_id(entities):
+            d = math.dist(self.pos, e["pos"])
+            if d <= radius and (best_d is None or d < best_d):
+                best, best_d = e, d
+        return best
+
+    def _hold_add(self, kind, n, events) -> int:
+        """Thêm tối đa `n` món `kind` vào CUỐI giỏ (LIFO), không vượt hold_capacity.
+        Trả số đã thêm; phát `hold_full` khi không thêm đủ `n` (giả định clarify #2: nhận một phần)."""
+        room = max(0, int(self.t["hold_capacity"]) - len(self.hold))
+        added = min(int(n), room)
+        self.hold.extend([kind] * added)
+        if added < n:
+            events.append(("hold_full", {"kind": kind}))
+        return added
+
+    def _harvest(self, events):
+        """`interact` ngoài bến: chỉ ở mặt nước, hái nút `ready` gần nhất trong interact_radius."""
+        if not self._at_surface():
+            return
+        ready = [n for n in self.nodes if n["regrow_ticks"] == 0]
+        node = self._nearest(ready, self.t["interact_radius"])
+        if node is None:
+            return
+        i = len(events)  # `gather` đứng TRƯỚC `hold_full` của cùng lượt
+        added = self._hold_add(node["kind"], self.t["node_yield"], events)
+        if added > 0:
+            node["regrow_ticks"] = int(round(self.t["regrow_s"] * TICK))
+            events.insert(i, ("gather", {"node_id": node["id"], "kind": node["kind"], "count": added}))
+
+    def _catch(self, events):
+        """`catch`: chỉ dưới nước và hết hồi chiêu. Mỗi lần vung đều bắt đầu hồi chiêu (kể cả hụt).
+        Bắt được thì đàn cá biến mất (cá sinh lại là việc phase sau)."""
+        if self._at_surface() or self.catch_cd_ticks > 0:
+            return
+        self.catch_cd_ticks = int(round(self.t["catch_cooldown_s"] * TICK))
+        fish = self._nearest(self.fish, self.t["catch_radius"])
+        if fish is None:
+            return
+        i = len(events)
+        added = self._hold_add(fish["kind"], self.t["fish_yield"][fish["kind"]], events)
+        if added > 0:
+            self.fish.remove(fish)
+            events.insert(i, ("fish_caught", {"fish_id": fish["id"], "kind": fish["kind"], "count": added}))
 
     # --- tiện ích ---------------------------------------------------------------
     def _at_surface(self) -> bool:
