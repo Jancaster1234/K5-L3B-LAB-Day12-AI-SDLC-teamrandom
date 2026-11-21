@@ -80,11 +80,12 @@ class SpawnAndReserve(unittest.TestCase):
         self.assertEqual(s.sim._cookable_dishes(), remaining)
 
     def test_het_ban_trong_khong_sinh_them_va_khong_phat_no_dish(self):
-        # Có 1 bàn T1, kho đủ 2 món; tick 120 C1 ngồi T1; tick 120 + 900 T1 vẫn bận -> không sinh C2, không no_dish
-        s, evs = play_quan({"stock": {"ca_loc": 2}}, FIRST_TICK + INTERVAL_TICKS + 1)
-        self.assertEqual(names(evs), ["customer_arrived"])
-        self.assertEqual(len(s.sim.customers), 1)
-        self.assertEqual(s.sim.customers[0]["id"], "C1")
+        # v1.1 có 4 bàn: cho khách ngồi kín cả 4 bàn, kho còn dư 1 cá lóc -> tới lượt khách không sinh, không no_dish
+        tables = [t["id"] for t in Q["tables"]]
+        custs = [{"id": f"C{i + 1}", "table_id": tb, "dish_id": "ca_loc_nuong_trui"} for i, tb in enumerate(tables)]
+        s, evs = play_quan({"stock": {"ca_loc": len(tables) + 1}, "customers": custs}, FIRST_TICK + 1)
+        self.assertEqual(evs, [])
+        self.assertEqual(len(s.sim.customers), len(tables))
 
     def test_random_customers_false_tat_sinh_khach_theo_lich(self):
         s, evs = play_quan({"stock": {"ca_loc": 2}, "random_customers": False}, FIRST_TICK + INTERVAL_TICKS)
