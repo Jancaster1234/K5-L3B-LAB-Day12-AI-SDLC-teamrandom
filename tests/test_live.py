@@ -57,6 +57,21 @@ class LiveServerTest(unittest.TestCase):
         self.assertFalse(server.game._thread.is_alive())
         self.assertFalse(server._thread.is_alive())
 
+    def test_day_state_has_history_for_result_screens(self):
+        """Chế độ day: /state có `history` (DayResult / Summary) và `days_total`; gather không có (headless không đổi)."""
+        tuning = load_contract()["tuning"]
+        for mode, expect in (("day", True), ("gather", False)):
+            server = LiveServer(LiveGame(mode, tuning, {}, 1, days=2), port=0)
+            server.start()
+            try:
+                st = json.loads(_get(f"http://127.0.0.1:{server.port}/state")[1])
+                self.assertEqual("history" in st, expect, mode)
+                if expect:
+                    self.assertEqual(st["history"], [])
+                    self.assertEqual(st["days_total"], 2)
+            finally:
+                server.stop()
+
     def test_assets_route_serves_sprites_only(self):
         """Route /assets/ (nhóm thêm cho sprite): trả PNG có thật, chặn thoát thư mục và đuôi lạ."""
         tuning = load_contract()["tuning"]

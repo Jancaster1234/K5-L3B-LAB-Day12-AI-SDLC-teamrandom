@@ -6,6 +6,7 @@ Máy chủ HTTP nhỏ (ThreadingHTTPServer) phục vụ `chonoi/web/index.html` 
     GET  /state  -> snapshot JSON hiện tại (cùng trường như dòng snapshot của headless) + `meta` + `events`
     POST /input  -> {"move": [a, b], "interact": bool, "catch": bool}   (trạng thái phím đang giữ)
     POST /restart -> chơi lại từ đầu (cùng seed, cùng scenario)
+    (`--mode day`: /state có thêm `history` từng Ngày và `days_total` cho màn DayResult / Summary; chỉ live)
     GET  /assets/<file> -> sprite tĩnh trong `chonoi/web/assets/` (nhóm thêm; chỉ client dùng, headless không đụng)
 
 Mô phỏng chạy 60 tick/s trong một luồng nền, dùng CÙNG lớp sim như headless (qua `runner.Session`).
@@ -109,6 +110,10 @@ class LiveGame:
             snap["finished"] = self.session.done
             snap["reason"] = self.session.sim.reason if self.session.done else None
             snap["error"] = self.error
+            sim = self.session.sim
+            if hasattr(sim, "history"):  # nhóm thêm: chỉ live (DayResult / Summary), headless không đổi
+                snap["history"] = [dict(h, sold=dict(h.get("sold", {}))) for h in sim.history]
+                snap["days_total"] = sim.days
             return json.dumps(snap, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
     def set_input(self, body: dict):

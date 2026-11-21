@@ -17,5 +17,5 @@
 
 ## Đánh giá ngắn
 - Lõi Test Contract v1.1 đạt trên test tự động (127 test kể cả `burn`). Chưa đạt: menu/intro/Shop/HUD trên cửa sổ chơi.
-- *Cập nhật sau (P4 / v1.1.0, không đổi kết quả tại tag `phase-2`):* cửa sổ chơi đã có pause, Shop đồ họa, HUD, 3 cảnh báo ([ảnh](../proof/phase-4/ui/README.md)); vẫn chưa có menu chính / DayIntro / Summary.
+- *Cập nhật sau (P4 / v1.1.0, không đổi kết quả tại tag `phase-2`):* cửa sổ chơi đã có pause, Shop đồ họa, HUD, 3 cảnh báo, **Menu, DayIntro, Buổi tối, Kết quả Ngày, Tổng kết** — ảnh chụp khi bot chơi trọn một Ngày trên live thật ([ảnh](../proof/phase-4/ui/README.md)). Nếu chấm lại sau P4 thì AC-P2-08 đạt.
 - Tag `phase-2` gắn trễ so với mốc 1:55 (nhóm làm lại Phase 1 theo PRD-0 trước); ghi trung thực.

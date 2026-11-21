@@ -23,6 +23,7 @@ const ctx = cv.getContext("2d");
 let snap = null, offline = false;
 let hc = false;  // Ticket-04: chế độ tương phản cao (phím H)
 try { hc = localStorage.getItem("chonoi.hc") === "1"; } catch (e) { /* không có storage */ }
+try { const q = new URLSearchParams(location.search).get("hc"); if (q !== null) hc = q === "1"; } catch (e) { /* bỏ qua */ }  // ?hc=1 mở thẳng tương phản cao
 
 // ---------- vào: phím ----------
 const down = new Set();
@@ -57,18 +58,56 @@ async function flush() {
   inflight = false;
 }
 function keyName(e) { return e.key.length === 1 ? e.key.toLowerCase() : e.key.toLowerCase(); }
+function toggleHc() { hc = !hc; try { localStorage.setItem("chonoi.hc", hc ? "1" : "0"); } catch (e) { /* bỏ qua */ } }
+let restarting = false;  // bỏ qua snapshot cũ còn trên đường về trong lúc server dựng lại lượt chơi
+function restartGame() {
+  lastSent = ""; down.clear(); screens = []; pausedByScreen = false; restarting = true;
+  fetch("/restart", { method: "POST" }).catch(() => {}).finally(() => setTimeout(() => { resetScreens(); restarting = false; }, 100));
+}
+
+// ---------- màn phủ: Menu → DayIntro → (lặn) → Buổi tối → (quán) → Kết quả Ngày → Shop … → Tổng kết ----------
+// Màn đang mở thì client gửi một cú `pause` (cùng nút Esc/P) để sim đứng yên; Enter đóng màn và bỏ pause.
+let screens = [], pausedByScreen = false, seenKey = null, bootDone = false;
+function pressPause() { down.add("pause"); pushInput(); down.delete("pause"); pushInput(); }
+function openScreen(s) {
+  screens.push(s);
+  if (screens.length === 1 && snap && snap.state === "playing") { pressPause(); pausedByScreen = true; }
+}
+function nextScreen() {
+  screens.shift();
+  if (!screens.length && pausedByScreen) { pressPause(); pausedByScreen = false; }
+}
+function resetScreens() { screens = []; pausedByScreen = false; seenKey = null; bootDone = false; }
+function watchScreens() {
+  if (!snap || snap.error || restarting) return;
+  if (!bootDone) { bootDone = true; if (!snap.finished) openScreen({ kind: "menu" }); }
+  if (snap.mode !== "day" || snap.finished) return;
+  const key = snap.phase + ":" + snap.day;
+  if (key === seenKey) return;
+  seenKey = key;
+  if (snap.phase === "gather") openScreen({ kind: "dayintro" });
+  else if (snap.phase === "quan") openScreen({ kind: "evening" });
+  else if (snap.phase === "shop") openScreen({ kind: "result" });
+}
+
 addEventListener("keydown", (e) => {
   const k = keyName(e);
   if (e.repeat) { if (k === " " || k.startsWith("arrow")) e.preventDefault(); return; }
+  if (screens.length) {  // đang ở màn phủ: chỉ Enter / H / R
+    if (k === "enter") { e.preventDefault(); nextScreen(); }
+    else if (k === "h") toggleHc();
+    else if (k === "r") restartGame();
+    return;
+  }
   if (MOVE_KEYS[k]) { down.add(MOVE_KEYS[k]); e.preventDefault(); }
   else if (k === "e") down.add("interact");
   else if (k === " ") { down.add("catch"); e.preventDefault(); }
-  else if (k === "r") { fetch("/restart", { method: "POST" }); lastSent = ""; down.clear(); }
+  else if (k === "r") restartGame();
   else if (k === "escape" || k === "p") down.add("pause");
   else if (k === "enter") down.add("shop_done");
   else if (k === "1") pendingBuy = "oxygen";
   else if (k === "2") pendingBuy = "hp";
-  else if (k === "h") { hc = !hc; try { localStorage.setItem("chonoi.hc", hc ? "1" : "0"); } catch (e) { /* bỏ qua */ } }
+  else if (k === "h") toggleHc();
   pushInput();
 });
 addEventListener("keyup", (e) => {
@@ -88,6 +127,7 @@ async function poll() {
     const r = await fetch("/state", { cache: "no-store" });
     snap = await r.json();
     offline = false;
+    watchScreens();
   } catch (e) { offline = true; }
   setTimeout(poll, 16);
 }
@@ -155,7 +195,8 @@ function eventLog(w, h) {
 function overlay(w, h) {
   if (offline) text("Mất kết nối tới máy chủ (đã tắt chưa?)", w / 2, 30, { align: "center", color: "#ff8a80", size: 16 });
   if (snap.error) text("Luật của nhóm báo lỗi — xem terminal. R để chơi lại.", w / 2, 52, { align: "center", color: "#ff8a80", size: 15 });
-  if (snap.state === "paused" && !snap.finished) {
+  if (snap.finished && snap.mode === "day" && snap.history) { drawSummary(w, h); return; }
+  if (snap.state === "paused" && !snap.finished && !screens.length) {
     ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(0, 0, w, h);
     text("⏸ TẠM DỪNG", w / 2, h / 2 - 10, { align: "center", size: 32 });
     text("Esc / P: tiếp tục · R: về đầu", w / 2, h / 2 + 24, { align: "center", size: 18, color: "#cfd8dc" });
@@ -642,6 +683,116 @@ function warnings(w, h) {
   });
 }
 
+// ----- màn phủ (Menu / DayIntro / Buổi tối / Kết quả Ngày / Tổng kết): chỉ client, không đụng luật -----
+function card(w, h, cw, ch, title, sub) {
+  ctx.fillStyle = hc ? "rgba(0,0,0,.92)" : "rgba(8,18,28,.78)"; ctx.fillRect(0, 0, w, h);
+  const x = (w - cw) / 2, y = Math.max(20, (h - ch) / 2);
+  ctx.fillStyle = hc ? "#000" : "#fbf3e0"; rrect(x, y, cw, ch, 16); ctx.fill();
+  ctx.strokeStyle = hc ? "#ffff00" : "#6b4a2b"; ctx.lineWidth = 4; ctx.stroke();
+  ctx.fillStyle = hc ? "#222" : "#6d4c2f"; rrect(x, y, cw, 64, 16); ctx.fill(); ctx.fillRect(x, y + 40, cw, 24);
+  text(title, x + cw / 2, y + 42, { size: 26, align: "center", color: hc ? "#ffff00" : "#ffe9b0" });
+  if (sub) text(sub, x + cw / 2, y + 90, { size: 15, align: "center", color: hc ? "#fff" : "#5d4037" });
+  return { x, y, ink: hc ? "#ffffff" : "#3e2723", soft: hc ? "#ffff00" : "#6d5a45" };
+}
+function prompt(w, y, msg) {
+  const on = Math.floor(performance.now() / 600) % 2 === 0;
+  text(msg, w / 2, y, { size: 20, align: "center", color: on ? (hc ? "#ffff00" : "#2e7d32") : (hc ? "#bbbb00" : "#66a36a") });
+}
+function chip(x, y, label, color, ink) {
+  ctx.font = "15px system-ui, sans-serif";
+  const tw = ctx.measureText(label).width + 30;
+  ctx.fillStyle = "rgba(0,0,0,.06)"; rrect(x, y - 18, tw, 26, 13); ctx.fill();
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x + 13, y - 5, 6, 0, Math.PI * 2); ctx.fill();
+  text(label, x + 24, y, { size: 15, color: ink });
+  return tw + 8;
+}
+function chips(x0, y, maxW, items, ink) {  // items: [label, color]; xuống dòng khi tràn
+  let x = x0;
+  items.forEach(([label, color]) => {
+    ctx.font = "15px system-ui, sans-serif";
+    const tw = ctx.measureText(label).width + 38;
+    if (x + tw > x0 + maxW) { x = x0; y += 32; }
+    x += chip(x, y, label, color, ink);
+  });
+  return y;
+}
+function drawScreen(w, h, s) {
+  const days = snap.days_total || 1, day = snap.day || 1;
+  if (s.kind === "menu") {
+    const c = card(w, h, Math.min(720, w - 32), Math.min(470, h - 40), "QUÁN ĂN CHỢ NỔI", "Út Sen lặn bắt cá, hái bông súng trên sông — tối về mở quán phục vụ khách");
+    const cw = Math.min(720, w - 32);
+    // trang trí: Út Sen đội nón lá (góc trái) + cá (góc phải dưới), tránh vùng chữ ở giữa
+    if (sheetOk("chars")) { tile("chars", PLAYER_LOOK[0], PLAYER_LOOK[1], c.x + 70, c.y + 290, 80); nonLa(c.x + 70, c.y + 262, 70); }
+    if (ok("fish_blue")) sprite("fish_blue", c.x + cw - 80, c.y + 330, 54, true);
+    if (ok("fish_green")) sprite("fish_green", c.x + cw - 70, c.y + 380, 64, true);
+    const mode = snap.mode === "day" ? `Cả ngày · ${days} Ngày (lặn → quán → Shop)` : snap.mode === "quan" ? "Buổi tối · ca quán" : "Buổi sáng · lặn chợ nổi";
+    text("Chế độ: " + mode, c.x + cw / 2, c.y + 126, { size: 16, align: "center", color: c.ink });
+    const rows = [["WASD / mũi tên", "bơi, đi"], ["E", "hái hoa · cập bến · nấu · bưng · phục vụ"], ["Space", "bắt cá (dưới nước)"],
+                  ["Esc / P", "tạm dừng"], ["1 / 2 · Enter", "mua ở Shop · đóng Shop"], ["H", "tương phản cao"], ["R", "chơi lại"]];
+    rows.forEach(([k2, v], i) => {
+      text(k2, c.x + cw / 2 - 20, c.y + 168 + i * 26, { size: 15, align: "right", color: c.soft });
+      text(v, c.x + cw / 2, c.y + 168 + i * 26, { size: 15, color: c.ink });
+    });
+    text("Điểm = tiền kiếm được + 100 × uy tín (làm tròn xuống)", c.x + cw / 2, c.y + 368, { size: 14, align: "center", color: c.soft });
+    prompt(w, c.y + 418, "▶ Nhấn Enter để bắt đầu");
+  } else if (s.kind === "dayintro") {
+    const cw = Math.min(720, w - 32);
+    const c = card(w, h, cw, Math.min(410, h - 40), `NGÀY ${day} / ${days}`, "Buổi sáng: lặn chợ nổi lấy nguyên liệu cho thực đơn tối nay");
+    const plan = snap.day_plan || {}, dishes = plan.dishes || {}, ing = plan.ingredients || {};
+    text("Thực đơn tối nay", c.x + 40, c.y + 132, { size: 17, color: c.ink });
+    let y = chips(c.x + 40, c.y + 164, cw - 80, Object.keys(dishes).map((d) => [dishName(d) + " × " + dishes[d], "#d9822b"]), c.ink);
+    text("Cần lấy", c.x + 40, y + 42, { size: 17, color: c.ink });
+    y = chips(c.x + 40, y + 74, cw - 80, Object.keys(ing).sort().map((k2) => [(KIND_NAME[k2] || k2) + " × " + ing[k2], kc(k2)]), c.ink);
+    const p = snap.player || {};
+    if (p.oxygen_max_ticks) text(`Trang bị: oxy ${Math.round(p.oxygen_max_ticks / 60)} giây · Máu ${p.hp_max}`, c.x + 40, y + 46, { size: 15, color: c.soft });
+    text("Hái hoa ở mặt nước (E) · lặn bắt cá (Space) · về bến (E) cất đồ · coi chừng Cá Sấu ở chỗ sâu", c.x + cw / 2, y + 80, { size: 14, align: "center", color: c.soft });
+    prompt(w, y + 122, "▶ Enter: xuống nước");
+  } else if (s.kind === "evening") {
+    const cw = Math.min(720, w - 32);
+    const c = card(w, h, cw, Math.min(340, h - 40), `BUỔI TỐI · NGÀY ${day}`, "Mở quán: khách tới gọi món, nấu ở bếp rồi bưng ra bàn");
+    const groups = {};
+    (Array.isArray(snap.stock) ? snap.stock : []).forEach((e) => { const g = (groups[e.kind] = groups[e.kind] || { n: 0, bad: 0 }); g.n++; if (e.fresh < 30) g.bad++; });
+    text("Kho mang về từ chợ nổi", c.x + 40, c.y + 132, { size: 17, color: c.ink });
+    const items = Object.keys(groups).sort().map((k2) => [(KIND_NAME[k2] || k2) + " × " + groups[k2].n + (groups[k2].bad ? ` (ươn ${groups[k2].bad})` : ""), kc(k2)]);
+    let y = items.length ? chips(c.x + 40, c.y + 164, cw - 80, items, c.ink) : (text("(kho trống — khách sẽ không gọi được món)", c.x + 40, c.y + 164, { size: 15, color: "#c62828" }), c.y + 164);
+    const dishes = Object.keys((snap.day_plan || {}).dishes || {});
+    text("Thực đơn: " + dishes.map(dishName).join(" · "), c.x + 40, y + 46, { size: 15, color: c.ink });
+    text("Món chín để quá 20 giây sẽ cháy · khách chờ lâu sẽ bỏ đi và mất uy tín", c.x + cw / 2, y + 84, { size: 14, align: "center", color: c.soft });
+    prompt(w, y + 126, "▶ Enter: mở cửa quán");
+  } else if (s.kind === "result") {
+    const cw = Math.min(620, w - 32);
+    const c = card(w, h, cw, Math.min(420, h - 40), `KẾT QUẢ NGÀY ${day}`, null);
+    const r = (snap.history || []).filter((e) => e.day === day).pop() || {};
+    const served = r.served || 0, left = r.left || 0, total = served + left;
+    const stars = total ? Math.round((served / total) * 5) : 0;
+    text("★★★★★".slice(0, stars) + "☆☆☆☆☆".slice(0, 5 - stars), c.x + cw / 2, c.y + 104, { size: 30, align: "center", color: "#f9a825" });
+    const rows = [["Khách đã phục vụ", served], ["Khách bỏ đi", left], ["Thu trong ca", (r.shift_earned || 0) + "k"], ["Tiền boa", (r.tips || 0) + "k"],
+                  ["Tiền hiện có", (snap.money ?? 0) + "k"], ["Uy tín", (snap.reputation ?? 0).toFixed(1)], ["Điểm", snap.score ?? 0]];
+    rows.forEach(([k2, v], i) => {
+      text(k2, c.x + cw / 2 - 16, c.y + 146 + i * 28, { size: 16, align: "right", color: c.soft });
+      text(String(v), c.x + cw / 2 + 4, c.y + 146 + i * 28, { size: 16, color: c.ink });
+    });
+    const sold = r.sold || {};
+    const soldTxt = Object.keys(sold).map((d) => dishName(d) + " × " + sold[d]).join(" · ");
+    text(soldTxt ? "Đã bán: " + soldTxt : "Chưa bán được món nào", c.x + cw / 2, c.y + 146 + rows.length * 28 + 6, { size: 14, align: "center", color: c.soft });
+    prompt(w, c.y + 146 + rows.length * 28 + 50, "▶ Enter: vào Shop");
+  }
+}
+function drawSummary(w, h) {
+  const hist = snap.history || [], cw = Math.min(760, w - 32);
+  const c = card(w, h, cw, Math.min(170 + hist.length * 30 + 130, h - 40), `TỔNG KẾT · ${snap.days_completed || hist.length} NGÀY`, "Cảm ơn đã ghé Quán Ăn Chợ Nổi!");
+  const cols = ["Ngày", "Phục vụ", "Bỏ đi", "Thu trong ca", "Boa", "Uy tín", "Tổng thu"];
+  const cx = (i) => c.x + 40 + i * ((cw - 80) / (cols.length - 1));
+  cols.forEach((t, i) => text(t, cx(i), c.y + 132, { size: 14, align: i ? "center" : "left", color: c.soft }));
+  hist.forEach((r, j) => {
+    const vals = [r.day, r.served, r.left, (r.shift_earned || 0) + "k", (r.tips || 0) + "k", r.reputation !== undefined ? r.reputation.toFixed(1) : "—", r.earned !== undefined ? r.earned + "k" : "—"];
+    vals.forEach((v, i) => text(String(v), cx(i), c.y + 164 + j * 30, { size: 16, align: i ? "center" : "left", color: c.ink }));
+  });
+  const yb = c.y + 164 + hist.length * 30 + 20;
+  text(`Điểm cuối: ${snap.score ?? 0}  =  ${snap.earned ?? 0} + 100 × ${Math.floor(snap.reputation ?? 0)}`, c.x + cw / 2, yb + 10, { size: 22, align: "center", color: c.ink });
+  prompt(w, yb + 56, "R: chơi lại");
+}
+
 function frame() {
   requestAnimationFrame(frame);  // đặt trước để lỗi vẽ không làm dừng vòng lặp
   const [w, h] = fit();
@@ -661,6 +812,7 @@ function frame() {
     text("H: tương phản cao " + (hc ? "BẬT" : "tắt") + " · Esc/P: tạm dừng", w - 10, 28, { size: 12, align: "right", color: "#9fb3c0" });
     eventLog(w, h);
     overlay(w, h);
+    if (screens.length) drawScreen(w, h, screens[0]);
   } else {
     text(offline ? "Không kết nối được máy chủ…" : "Đang tải…", w / 2, h / 2, { align: "center", size: 18 });
   }
