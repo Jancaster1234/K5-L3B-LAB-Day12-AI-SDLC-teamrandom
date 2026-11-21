@@ -50,6 +50,7 @@ class Oxygen(unittest.TestCase):
         oe = [e for e in evs if e["name"] == "oxygen_empty"]
         self.assertEqual(len(oe), 1)
         self.assertEqual(oe[0]["tick"], 1)
+        self.assertEqual(oe[0]["data"], {"oxygen_ticks": 0})
 
 
 class Choke(unittest.TestCase):
@@ -95,6 +96,8 @@ class Faint(unittest.TestCase):
     def test_mau_ve_0_thi_ngat_mat_gio(self):
         s, evs = play(self.SC, 10)
         self.assertEqual(names(evs), ["choke", "faint", "gather_end"])
+        # PRD-0 mục E: lost theo LIFO (mới nhặt trước); giỏ ["ca_loc", "bong_sung"]
+        self.assertEqual(evs[1]["data"], {"cause": "choke", "lost": ["bong_sung", "ca_loc"], "hp": 0})
         self.assertEqual(evs[-1]["data"], {"reason": "fainted", "inventory": {"items": {}}})
         self.assertTrue(s.done)
         self.assertEqual(s.end_row()["reason"], "fainted")

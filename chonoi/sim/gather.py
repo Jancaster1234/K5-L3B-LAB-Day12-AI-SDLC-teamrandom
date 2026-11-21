@@ -196,7 +196,7 @@ class GatherSim:
         before = self.oxygen_ticks
         self.oxygen_ticks = max(0, self.oxygen_ticks - 1)
         if before > 0 and self.oxygen_ticks == 0:
-            events.append(("oxygen_empty", {}))
+            events.append(("oxygen_empty", {"oxygen_ticks": 0}))
         if self.oxygen_ticks > 0:
             return False
 
@@ -209,8 +209,10 @@ class GatherSim:
         events.append(("choke", {"hp": self.hp}))
         if self.hp > 0:
             return False
-        self.hold = []  # ngất: mất toàn bộ giỏ -> kho rỗng
-        events.append(("faint", {}))
+        # ngất: mất toàn bộ giỏ -> kho rỗng; `lost` liệt kê theo LIFO (mới nhặt trước) — PRD-0 mục E
+        lost = list(reversed(self.hold))
+        self.hold = []
+        events.append(("faint", {"cause": "choke", "lost": lost, "hp": 0}))
         self._finish("fainted", events)
         return True
 
