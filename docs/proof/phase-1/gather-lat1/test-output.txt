@@ -1,0 +1,55 @@
+# commit d150448 â€” Python 3.12.0
+# PYTHONPATH="tests;." python3 -m unittest discover -s tests -v
+test_du_chu_ky_thi_tru_mau ... ok
+test_moc_thoi_gian_choke_tu_luc_het_oxy ... ok
+test_noi_len_reset_dem_ngat ... ok
+test_cung_dau_vao_cung_ket_qua ... ok
+test_mau_ve_0_thi_ngat_mat_gio ... ok
+test_ngat_ghi_kho_rong ... ok
+test_ngat_xet_truoc_cap_ben ... ok
+test_duoi_nuoc_tru_1_moi_tick ... ok
+test_mat_nuoc_hoi_oxy_va_kep_tran ... ok
+test_oxygen_empty_dung_mot_lan ... ok
+test_dive_khi_xuong_duoi_mat_nuoc ... ok
+test_dung_yen_khong_phat_dive_surface ... ok
+test_state_input_and_clean_stop ... ok
+test_bad_frames_raise ... ok
+test_catch_is_a_v10_button_and_attack_is_not ... ok
+test_id_allocator_continues_after_max ... ok
+test_id_sorting ... ok
+test_input_edges_and_inherit ... ok
+test_live_inputs_keep_fast_tap_edge ... ok
+test_session_steps_gather_and_dock ... ok
+test_con_01_ticks_zero_and_end_line ... ok
+test_con_02_deterministic_bytes ... ok
+test_con_03_bad_input_exit_2 ... ok
+test_con_03_old_and_future_modes_rejected ... ok
+test_gather_snapshot_has_gather_fields ... ok
+test_scenario_out_of_domain_exit_2 ... ok
+test_inv_01_gather_writes_inventory_quan_reads_it
+Ví d\u1ee5 smoke test trong PRD-0 m\u1ee5c G: c\u1eadp b\u1ebfn \u1edf tick 0, quán \u0111\u1ecdc kho \u0111úng n\u1ed9i dung. ... ok
+test_inv_01_not_written_when_tick_limit_first ... ok
+test_inv_bad_schema_exit_2 ... ok
+test_inventory_and_scenario_stock_conflict ... ok
+test_inventory_flags_mode_mismatch_exit_2 ... ok
+test_move_01_swim_speed_after_ramp
+B\u1ecf 6 tick t\u0103ng t\u1ed1c r\u1ed3i \u0111o 60 tick: quãng \u2248 swim_speed × 1 s. Ngang, xu\u1ed1ng, chéo (không nhanh h\u01a1n). ... ok
+test_move_02_heading_positive_is_down ... ok
+test_move_03_edge_clamp
+Ch\u1eb7n t\u1eebng mép c\u1ee7a vùng n\u01b0\u1edbc, k\u1ec3 c\u1ea3 d không âm và \u0111áy d = 30. ... ok
+test_move_mep_vel_ve_0 ... ok
+test_move_ramp_doi_huong_trong_tran
+\u0110\u1ea3o t\u1eeb +speed sang -speed: v\u1eadn t\u1ed1c ch\u1ea1m m\u1ee5c tiêu sau t\u1ed1i \u0111a ramp_max_ticks tick k\u1ec3 t\u1eeb lúc \u0111\u1ed5i input. ... ok
+test_time_ends_gather_and_keeps_hold ... ok
+test_khoi_sai_mode_exit_2 ... ok
+test_quan_fixture_khong_hop_le_exit_2 ... ok
+test_quan_player_vel_hop_le ... ok
+test_good ... ok
+test_template_is_rejected ... ok
+test_too_few_members ... ok
+test_wrong_size_duplicate_and_outsider ... ok
+
+----------------------------------------------------------------------
+Ran 44 tests in Xs
+
+OK
