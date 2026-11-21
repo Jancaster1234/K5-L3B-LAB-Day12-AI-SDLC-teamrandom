@@ -8,7 +8,7 @@ phải có đúng một món, khách eating thiếu giá/tip...) — xem PRD-0 m
 import json
 
 from .errors import BadInput
-from .inventory import KINDS_P1, validate_items
+from .inventory import validate_item_list
 
 GATHER_KEYS = {"player", "hold", "nodes", "fish", "random_fish", "time_left_ticks", "monsters"}
 MONSTER_KEYS = {"id", "kind", "pos", "waypoints", "target_idx", "state", "state_ticks_left", "recoil_dir"}
@@ -157,8 +157,7 @@ def _validate_gather(b, tuning):
         raise BadInput("random_fish phải là boolean")
     if "hold" in b:
         h = b["hold"]
-        if not isinstance(h, list) or any(k not in KINDS_P1 for k in h):
-            raise BadInput("hold phải là mảng id nguyên liệu hợp lệ")
+        validate_item_list(h, "gather.hold")  # v1.2: mảng cá thể {id, kind, fresh}
         if len(h) > g["hold_capacity"]:
             raise BadInput("hold vượt sức chứa")
     p = b.get("player", {})
@@ -260,7 +259,7 @@ def _validate_quan(b, tuning):
         if arr in b:
             _check_ids(arr, b[arr])
     if "stock" in b:
-        validate_items(b["stock"])
+        validate_item_list(b["stock"], "quan.stock")  # v1.2: mảng cá thể, gồm cả phần giữ
     if "random_customers" in b and not isinstance(b["random_customers"], bool):
         raise BadInput("random_customers phải là boolean")
     q = tuning["quan"]
@@ -316,6 +315,8 @@ def _validate_quan(b, tuning):
         if "patience_ticks_left" in c and c["patience_ticks_left"] > pmax:
             raise BadInput(f"customers.{c['id']}.patience_ticks_left phải trong [0, {pmax}]")
         if "reserved" in c:
-            validate_items(c["reserved"])
+            r = c["reserved"]
+            if not isinstance(r, list) or not all(isinstance(x, str) and x for x in r) or len(set(r)) != len(r):
+                raise BadInput(f"customers.{c['id']}.reserved phải là mảng id cá thể khác nhau (v1.2)")
     if len(table_ids) != len(set(table_ids)):
         raise BadInput("hai khách cùng bàn")

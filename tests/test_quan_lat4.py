@@ -5,6 +5,8 @@ Tự test bằng scenario dựng sẵn, không phụ thuộc vào lát 3.
 import json
 import unittest
 
+from helpers import count, fresh_price, stock_items
+
 from chonoi.contract import load_contract
 from chonoi.inputs import LiveInputs
 from chonoi.runner import Session
@@ -22,7 +24,7 @@ class TestQuanLat4(unittest.TestCase):
         """Kiểm tra quy trình bếp: nấu (cook_started) -> chín (dish_ready) -> bốc món (dish_picked)."""
         scenario = {
             "player": {"pos": [2, 8]},  # Đứng sát bếp B1 [2, 8]
-            "stock": {"ca_loc": 1},
+            "stock": stock_items({"ca_loc": 1}),
             "customers": [
                 {
                     "id": "C1",
@@ -45,7 +47,7 @@ class TestQuanLat4(unittest.TestCase):
         cook_ev = next(e for e in evs if e["name"] == "cook_started")
         self.assertEqual(cook_ev["data"]["stove_id"], "B1")
         self.assertEqual(cook_ev["data"]["dish_id"], "ca_loc_nuong_trui")
-        self.assertNotIn("ca_loc", sess.sim.stock)
+        self.assertNotIn("ca_loc", count(sess.sim.stock))
         b1 = next(s for s in sess.sim.stoves if s["id"] == "B1")
         self.assertEqual(b1["state"], "cooking")
         self.assertEqual(b1["cook_ticks_left"], 360)  # 6s * 60
@@ -72,7 +74,8 @@ class TestQuanLat4(unittest.TestCase):
         self.assertIn("dish_picked", names)
         pick_ev = next(e for e in evs if e["name"] == "dish_picked")
         self.assertEqual(pick_ev["data"]["dish_id"], "ca_loc_nuong_trui")
-        self.assertEqual(sess.sim.hand, {"order_id": "C1", "dish_id": "ca_loc_nuong_trui", "base_price": 60})  # PRD-0: hand là payload món
+        self.assertEqual(sess.sim.hand, {"order_id": "C1", "dish_id": "ca_loc_nuong_trui",
+                                         "base_price": fresh_price(60, [24000 - 1])})  # v1.2: giá chốt theo tươi lúc nấu (tick 1)
         self.assertEqual(b1["state"], "idle")
         self.assertIsNone(b1["dish"])
 
@@ -199,7 +202,7 @@ class TestQuanLat4(unittest.TestCase):
         scenario = {
             "player": {"pos": [5, 5]},
             "hand": None,
-            "stock": {"ca_loc": 1},
+            "stock": stock_items({"ca_loc": 1}),
             "stoves": [{"id": "B1", "pos": [5, 6], "state": "idle"}],
             "tables": [{"id": "T1", "pos": [5, 4]}],
             "customers": [{"id": "C1", "table_id": "T1", "dish_id": "ca_loc_nuong_trui", "state": "waiting"}],

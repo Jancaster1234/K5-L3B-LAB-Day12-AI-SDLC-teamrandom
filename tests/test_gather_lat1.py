@@ -10,7 +10,7 @@ from chonoi.contract import load_contract
 from chonoi.inputs import InputPlayer
 from chonoi.runner import Session
 
-from helpers import Workdir
+from helpers import Workdir, items, kinds
 
 TUNING = load_contract()["tuning"]
 G = TUNING["gather"]
@@ -90,15 +90,18 @@ class Zones(unittest.TestCase):
 
 
 class Faint(unittest.TestCase):
-    SC = {"hold": ["ca_loc", "bong_sung"],
+    SC = {"hold": items("ca_loc", "bong_sung"),
           "player": {"pos": DEEP, "hp": 1, "oxygen_ticks": 0, "zero_oxy_ticks": CHOKE - 1}}
 
     def test_mau_ve_0_thi_ngat_mat_gio(self):
         s, evs = play(self.SC, 10)
         self.assertEqual(names(evs), ["choke", "faint", "gather_end"])
         # PRD-0 mục E: lost theo LIFO (mới nhặt trước); giỏ ["ca_loc", "bong_sung"]
-        self.assertEqual(evs[1]["data"], {"cause": "choke", "lost": ["bong_sung", "ca_loc"], "hp": 0})
-        self.assertEqual(evs[-1]["data"], {"reason": "fainted", "inventory": {"items": {}}})
+        d = evs[1]["data"]
+        self.assertEqual((d["cause"], d["hp"]), ("choke", 0))
+        self.assertEqual([e["id"] for e in d["lost"]], ["I2", "I1"])  # v1.2: cá thể, LIFO
+        self.assertEqual(kinds(d["lost"]), ["bong_sung", "ca_loc"])
+        self.assertEqual(evs[-1]["data"], {"reason": "fainted", "inventory": {"items": []}})
         self.assertTrue(s.done)
         self.assertEqual(s.end_row()["reason"], "fainted")
         self.assertEqual(s.sim.hold, [])
@@ -108,7 +111,7 @@ class Faint(unittest.TestCase):
             s, _ = play(self.SC, 10)
             s.write_inventory_if_done(w.path("inv.json"))
             with open(w.path("inv.json"), encoding="utf-8") as f:
-                self.assertEqual(json.load(f), {"items": {}})
+                self.assertEqual(json.load(f), {"items": []})
 
     def test_ngat_xet_truoc_cap_ben(self):
         sc = {**self.SC, "player": {**self.SC["player"], "pos": [2, 2]}}  # trong vùng bến, dưới nước

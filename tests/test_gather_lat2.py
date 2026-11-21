@@ -8,7 +8,7 @@ Giả định đang chờ PO (docs/clarify.md): #1 tên trường `data`, #2 gi�
 import json
 import unittest
 
-from helpers import Workdir, events, frames, read_jsonl, run_headless, snapshots, write_json
+from helpers import Workdir, events, frames, items, kinds, read_jsonl, run_headless, snapshots, write_json
 
 with open("game.contract.json", encoding="utf-8") as _f:
     G = json.load(_f)["tuning"]["gather"]
@@ -45,7 +45,7 @@ class Harvest(unittest.TestCase):
             self.assertEqual(len(ev), 1)
             self.assertEqual(ev[0]["data"], {"node_id": "N1", "kind": "bong_sung", "amount": G["node_yield"]})
             s = snapshots(rows)[-1]
-            self.assertEqual(s["hold"], ["bong_sung"] * G["node_yield"])
+            self.assertEqual(kinds(s["hold"]), ["bong_sung"] * G["node_yield"])
             n1 = s["nodes"][0]
             self.assertFalse(n1["ready"])
             self.assertGreater(n1["regrow_ticks"], G["regrow_s"] * TICK - 10)
@@ -84,14 +84,14 @@ class Harvest(unittest.TestCase):
 
     def test_gio_day_hold_full_nut_giu_nguyen(self):
         with Workdir() as w:
-            full = ["ca_loc"] * G["hold_capacity"]
+            full = items(*["ca_loc"] * G["hold_capacity"])
             rows = run(w, {"player": {"pos": [20, 0]}, "hold": full, "nodes": [node("N1", "bong_sung", 21)]},
                        [PRESS_E])
             self.assertEqual(events(rows, "gather"), [])
             self.assertEqual([e["data"] for e in events(rows, "hold_full")],
                              [{"action": "gather", "node_id": "N1", "required": G["node_yield"], "free": 0}])
             s = snapshots(rows)[-1]
-            self.assertEqual(s["hold"], full)
+            self.assertEqual([e["id"] for e in s["hold"]], [e["id"] for e in full])
             self.assertTrue(s["nodes"][0]["ready"])
 
     def test_ben_xet_truoc_hai(self):
@@ -103,9 +103,10 @@ class Harvest(unittest.TestCase):
 
     def test_gio_lifo_va_kho_khi_cap_ben(self):
         with Workdir() as w:
-            rows = run(w, {"player": {"pos": [20, 0]}, "hold": ["ca_loc"], "nodes": [node("N1", "bong_sung", 21)]},
+            rows = run(w, {"player": {"pos": [20, 0]}, "hold": items("ca_loc"), "nodes": [node("N1", "bong_sung", 21)]},
                        [PRESS_E])
-            self.assertEqual(snapshots(rows)[-1]["hold"], ["ca_loc", "bong_sung"])  # mới nhất ở cuối
+            hold = snapshots(rows)[-1]["hold"]  # mới nhất ở cuối; v1.2: id mới nối sau I1
+            self.assertEqual([(e["id"], e["kind"]) for e in hold], [("I1", "ca_loc"), ("I2", "bong_sung")])
 
 
 class Catch(unittest.TestCase):
@@ -117,7 +118,7 @@ class Catch(unittest.TestCase):
             self.assertEqual([e["data"] for e in ev],
                              [{"fish_id": "F1", "kind": "ca_linh", "yield": G["fish_yield"]["ca_linh"]}])
             s = snapshots(rows)[-1]
-            self.assertEqual(s["hold"], ["ca_linh"] * G["fish_yield"]["ca_linh"])
+            self.assertEqual(kinds(s["hold"]), ["ca_linh"] * G["fish_yield"]["ca_linh"])
             self.assertEqual([f["id"] for f in s["fish"]], ["F2"])  # đàn bị bắt biến mất
             self.assertGreater(s["player"]["catch_cd_ticks"], 0)
 
@@ -148,14 +149,14 @@ class Catch(unittest.TestCase):
     def test_ca_nhieu_hon_cho_trong_tu_choi_ca_luot(self):
         # PRD-0 (clarify #2): thiếu chỗ cho cả yield -> hold_full, giữ đàn, KHÔNG hồi chiêu, giỏ không đổi
         with Workdir() as w:
-            hold = ["bong_sung"] * (G["hold_capacity"] - 2)
+            hold = items(*["bong_sung"] * (G["hold_capacity"] - 2))
             rows = run(w, {"player": {"pos": [30, 10]}, "hold": hold, "fish": [fish("F1", "ca_linh", 30, 10)]},
                        [PRESS_CATCH])
             self.assertEqual(events(rows, "fish_caught"), [])
             self.assertEqual([e["data"] for e in events(rows, "hold_full")],
                              [{"action": "catch", "fish_id": "F1", "required": G["fish_yield"]["ca_linh"], "free": 2}])
             s = snapshots(rows)[-1]
-            self.assertEqual(s["hold"], hold)
+            self.assertEqual([e["id"] for e in s["hold"]], [e["id"] for e in hold])
             self.assertEqual([f["id"] for f in s["fish"]], ["F1"])
             self.assertEqual(s["player"]["catch_cd_ticks"], 0)
 
@@ -168,7 +169,7 @@ class Catch(unittest.TestCase):
 
     def test_gio_day_ca_o_lai(self):
         with Workdir() as w:
-            rows = run(w, {"player": {"pos": [30, 10]}, "hold": ["bong_sung"] * G["hold_capacity"],
+            rows = run(w, {"player": {"pos": [30, 10]}, "hold": items(*["bong_sung"] * G["hold_capacity"]),
                            "fish": [fish("F1", "ca_loc", 30, 10)]}, [PRESS_CATCH])
             self.assertEqual(events(rows, "fish_caught"), [])
             self.assertEqual(len(events(rows, "hold_full")), 1)

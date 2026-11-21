@@ -6,6 +6,8 @@
 import math
 import unittest
 
+from helpers import fresh_price, stock_items
+
 from chonoi.contract import load_contract
 from chonoi.inputs import LiveInputs
 from chonoi.runner import Session
@@ -56,24 +58,28 @@ class Flow:
 
 class QuanFlow(unittest.TestCase):
     def test_khach_lat3_duoc_lat4_phuc_vu_va_tra_tien(self):
-        f = Flow({"stock": {"ca_loc": 1}, "player": {"pos": STOVE}})
+        f = Flow({"stock": stock_items({"ca_loc": 1}), "player": {"pos": STOVE}})
         f.wait_for("customer_arrived", Q["first_customer_tick"] + 1)
         arrived = f.first("customer_arrived")
         self.assertEqual(arrived["data"]["dish_id"], DISH)  # món duy nhất nấu được từ kho
         cid = arrived["data"]["order_id"]
-        self.assertEqual(f.s.sim.customers[0]["reserved"], MENU[DISH]["recipe"])
+        self.assertEqual(f.s.sim.customers[0]["reserved"], ["I1"])  # v1.2: giữ theo id
 
         f.step(interact=True)
         self.assertEqual(f.events[-1]["name"], "cook_started")
-        self.assertEqual(f.events[-1]["data"], {"stove_id": "B1", "order_id": cid, "dish_id": DISH,
-                                                 "items": [k for k in sorted(MENU[DISH]["recipe"]) for _ in range(MENU[DISH]["recipe"][k])], "base_price": MENU[DISH]["price"]})
-        self.assertEqual(f.s.sim.stock, {})
-        self.assertEqual(f.s.sim.customers[0]["reserved"], {})  # phần giữ chỗ đã vào nồi
+        d = f.events[-1]["data"]
+        self.assertEqual({k: d[k] for k in ("stove_id", "order_id", "dish_id")}, {"stove_id": "B1", "order_id": cid, "dish_id": DISH})
+        self.assertEqual([e["id"] for e in d["items"]], ["I1"])
+        cooked_tick = f.events[-1]["tick"]
+        price = fresh_price(MENU[DISH]["price"], [24000 - cooked_tick])  # hao 1 đơn vị/tick ở kho quán
+        self.assertEqual(d["base_price"], price)
+        self.assertEqual(f.s.sim.stock, [])
+        self.assertEqual(f.s.sim.customers[0]["reserved"], [])  # phần giữ chỗ đã vào nồi
 
         f.wait_for("dish_ready", int(MENU[DISH]["cook_s"] * 60) + 1)
         f.step(interact=True)
         self.assertEqual(f.events[-1]["name"], "dish_picked")
-        self.assertEqual(f.s.sim.hand, {"order_id": cid, "dish_id": DISH, "base_price": MENU[DISH]["price"]})
+        self.assertEqual(f.s.sim.hand, {"order_id": cid, "dish_id": DISH, "base_price": price})
 
         f.walk_to(TABLE)
         f.step(interact=True)
@@ -83,7 +89,6 @@ class QuanFlow(unittest.TestCase):
 
         f.wait_for("paid", int(Q["eat_s"] * 60) + 1)
         paid = f.first("paid")
-        price = MENU[DISH]["price"]
         tip = math.floor(price * Q["tip_rate"] + 1e-9)  # PRD-0: floor  # phục vụ nhanh -> còn > tip_min_patience_ratio
         self.assertEqual((paid["data"]["base_price"], paid["data"]["tip"]), (price, tip))
         self.assertEqual(f.s.sim.money, price + tip)
@@ -96,7 +101,7 @@ class QuanFlow(unittest.TestCase):
     def test_cung_dau_vao_cung_ket_qua(self):
         runs = []
         for _ in range(2):
-            f = Flow({"stock": {"ca_loc": 1, "bong_sung": 2}, "player": {"pos": STOVE}})
+            f = Flow({"stock": stock_items({"ca_loc": 1, "bong_sung": 2}), "player": {"pos": STOVE}})
             for t in range(900):
                 f.step(interact=(t % 50 == 0))
             runs.append(f.events)

@@ -7,6 +7,8 @@ kho dư bị bỏ sau Shop. Cấp vừa mua có hiệu lực từ Ngày kế (sa
 Pause do runner xử lý chung cho cả ba mode.
 """
 
+from ..fresh import out
+from ..ids import sort_by_id
 from .gather import GatherSim
 from .quan import QuanSim
 
@@ -73,7 +75,7 @@ class DaySim:
 
     def snapshot(self) -> dict:
         if self.phase == "shop":
-            snap = {"stock": {k: self.shop["stock"][k] for k in sorted(self.shop["stock"])}}
+            snap = {"stock": self.shop["stock"]}
         else:
             snap = self.sub.snapshot()
         snap.update(day=self.day, day_plan=self.day_plan_now(), upgrades=dict(sorted(self.upgrades.items())),
@@ -112,7 +114,7 @@ class DaySim:
         g = self.tuning["gather"]
         self.sub = GatherSim(self.tuning, self.scenario.get("gather", {}), self.rng, self.ids, day=self.day,
                              oxygen_max_s=self._level_value("oxygen", g["oxygen_max_s"]),
-                             hp_max=self._level_value("hp", g["hp_max"]))
+                             hp_max=self._level_value("hp", g["hp_max"]), renumber_hold=self.day > 1)
         self.phase = "gather"
         self.shop = None
         events.append(("day_start", {}, "gather", self.day))
@@ -132,7 +134,7 @@ class DaySim:
         self.history.append({"day": self.day, "served": q.served_count, "left": q.left_count,
                              "shift_earned": q.shift_earned, "tips": q.tips, "sold": dict(q.sold)})
         self.shop = {"phase_tick": 0, "time_left_ticks": int(self.tuning["shop"]["max_ticks"]),
-                     "stock": dict(q.stock)}
+                     "stock": [out(it) for it in sort_by_id(q.stock)]}  # hàng thô ở Shop không hao
         self.phase = "shop"
         events.append(("phase_start", {}, "shop", self.day))
 

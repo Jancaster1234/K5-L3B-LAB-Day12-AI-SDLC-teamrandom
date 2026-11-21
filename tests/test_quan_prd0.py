@@ -10,7 +10,7 @@ from chonoi.contract import load_contract
 from chonoi.inputs import LiveInputs
 from chonoi.runner import Session
 
-from helpers import Workdir, run_headless, write_json
+from helpers import Workdir, count, fresh_price, run_headless, stock_items, write_json
 
 TUNING = load_contract()["tuning"]
 Q = TUNING["quan"]
@@ -57,7 +57,7 @@ class Closing(unittest.TestCase):
         self.assertAlmostEqual(s.sim.reputation, Q["reputation_initial"] + Q["tip_reputation"])
 
     def test_het_ca_khach_cho_roi_closing_khong_tru_uy_tin(self):
-        sc = {"time_left_ticks": 1, "stock": {"ca_loc": 1},
+        sc = {"time_left_ticks": 1, "stock": stock_items({"ca_loc": 1}),
               "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH}]}
         s, evs = run(sc, 3)
         self.assertEqual(names(evs), ["customer_left", "quan_end"])
@@ -66,7 +66,7 @@ class Closing(unittest.TestCase):
         self.assertEqual(s.sim.reputation, Q["reputation_initial"])
 
     def test_het_ca_khong_sinh_khach_moi(self):
-        sc = {"time_left_ticks": Q["first_customer_tick"], "stock": {"ca_loc": 1}, "random_customers": True}
+        sc = {"time_left_ticks": Q["first_customer_tick"], "stock": stock_items({"ca_loc": 1}), "random_customers": True}
         _, evs = run(sc, Q["first_customer_tick"] + 5)
         self.assertEqual(names(evs), ["quan_end"])
 
@@ -118,24 +118,28 @@ class Interact(unittest.TestCase):
         self.assertEqual(ev(evs, "served")["data"]["tip"], math.floor(base * Q["tip_rate"]))
 
     def test_nau_dung_phan_giu_cho_cua_don(self):
-        sc = {"player": {"pos": STOVE}, "stock": {"ca_loc": 2},
+        sc = {"player": {"pos": STOVE}, "stock": stock_items({"ca_loc": 2}),
               "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH, "order_tick": 7}]}
         s, evs = run(sc, 1, interact_at={0})
-        self.assertEqual(ev(evs, "cook_started")["data"], {"stove_id": "B1", "order_id": "C1", "dish_id": DISH,
-                                                            "items": ["ca_loc"], "base_price": PRICE})
+        d = ev(evs, "cook_started")["data"]
+        self.assertEqual({k: d[k] for k in ("stove_id", "order_id", "dish_id")}, {"stove_id": "B1", "order_id": "C1", "dish_id": DISH})
+        self.assertEqual([(e["id"], e["kind"]) for e in d["items"]], [("I1", "ca_loc")])  # tươi nhất rồi id nhỏ
+        self.assertEqual(d["base_price"], fresh_price(PRICE, [24000 - 1]))  # v1.2: giá theo tươi sau 1 tick kho
         c = s.sim.customers[0]
-        self.assertEqual((c["order_status"], c["reserved"]), ("assigned", {}))
-        self.assertEqual(s.sim.stock, {"ca_loc": 1})
-        self.assertEqual(s.sim.stoves[0]["dish"], pay())
+        self.assertEqual((c["order_status"], c["reserved"]), ("assigned", []))
+        self.assertEqual(count(s.sim.stock), {"ca_loc": 1})
+        self.assertEqual(s.sim.stoves[0]["dish"], pay(base=fresh_price(PRICE, [24000 - 1])))
 
 
 class Contract(unittest.TestCase):
     def test_items_la_mang_kind_sap_theo_kind(self):
         dish = "lau_ca_linh_dien_dien"  # ca_linh x3 + bong_dien_dien x1
-        sc = {"player": {"pos": STOVE}, "stock": {"ca_linh": 3, "bong_dien_dien": 1},
+        sc = {"player": {"pos": STOVE}, "stock": stock_items({"ca_linh": 3, "bong_dien_dien": 1}),
               "customers": [{"id": "C1", "table_id": "T1", "dish_id": dish}]}
         _, evs = run(sc, 1, interact_at={0})
-        self.assertEqual(ev(evs, "cook_started")["data"]["items"], ["bong_dien_dien", "ca_linh", "ca_linh", "ca_linh"])
+        its = ev(evs, "cook_started")["data"]["items"]  # v1.2: mảng cá thể sắp theo kind rồi id
+        self.assertEqual([(e["kind"], e["id"]) for e in its],
+                         [("bong_dien_dien", "I4"), ("ca_linh", "I1"), ("ca_linh", "I2"), ("ca_linh", "I3")])
 
     def test_snapshot_player_quan_co_pos_va_vel(self):
         s, _ = run({}, 0)
@@ -153,7 +157,7 @@ class Timers(unittest.TestCase):
         self.assertEqual(s.sim.stoves[0]["ready_ticks"], 1)
 
     def test_khach_moi_co_order_tick_va_order_status(self):
-        s, evs = run({"stock": {"ca_loc": 1}, "random_customers": True}, Q["first_customer_tick"])
+        s, evs = run({"stock": stock_items({"ca_loc": 1}), "random_customers": True}, Q["first_customer_tick"])
         self.assertEqual(ev(evs, "customer_arrived")["data"], {"order_id": "C1", "table_id": "T1", "dish_id": DISH})
         c = s.sim.snapshot()["customers"][0]
         self.assertEqual((c["order_tick"], c["order_status"], c["base_price"], c["tip"]),
@@ -163,8 +167,8 @@ class Timers(unittest.TestCase):
 
 class ScenarioExit2(unittest.TestCase):
     BAD = {
-        "giữ khác công thức": {"stock": {"ca_loc": 2},
-                               "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH, "reserved": {"ca_loc": 2}}]},
+        "giữ khác công thức": {"stock": stock_items({"ca_loc": 2}),
+                               "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH, "reserved": ["I1", "I2"]}]},
         "bếp và tay giữ cùng đơn": {"hand": pay(), "stoves": [{"id": "B1", "state": "ready", "dish": pay()}],
                                     "customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH,
                                                    "order_status": "assigned"}]},
@@ -193,7 +197,7 @@ class ScenarioExit2(unittest.TestCase):
         s, evs = run({"customers": [{"id": "C1", "table_id": "T1", "dish_id": DISH,
                                      "order_status": "unfulfillable"}]}, 1)
         self.assertEqual(evs, [])
-        self.assertEqual(s.sim.customers[0]["reserved"], {})
+        self.assertEqual(s.sim.customers[0]["reserved"], [])
 
 
 if __name__ == "__main__":

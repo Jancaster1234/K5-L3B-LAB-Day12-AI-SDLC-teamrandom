@@ -7,7 +7,7 @@ from chonoi.contract import load_contract
 from chonoi.inputs import InputPlayer
 from chonoi.runner import Session
 
-from helpers import Workdir, run_headless, write_json
+from helpers import Workdir, items, kinds, run_headless, write_json
 
 TUNING = load_contract()["tuning"]
 G = TUNING["gather"]
@@ -118,15 +118,16 @@ class Crocodile(unittest.TestCase):
         self.assertNotIn("monster_hit", names(evs))
 
     def test_cham_mat_mau_rot_hang_lifo_bat_tu_recoil(self):
-        hold = ["ca_loc", "bong_sung", "ca_linh", "keo_neo", "ca_keo"]
+        hold = items("ca_loc", "bong_sung", "ca_linh", "keo_neo", "ca_keo")
         sc = {"random_fish": False, "hold": hold, "player": {"pos": [51, 15]}, "monsters": [croc()]}
         s, evs = play(sc, 1)
         hit = [e for e in evs if e["name"] == "monster_hit"]
         self.assertEqual(len(hit), 1)
         self.assertEqual(hit[0]["data"]["monster_id"], "M1")
         self.assertEqual(hit[0]["data"]["hp"], G["hp_max"] - 1)
-        self.assertEqual(hit[0]["data"]["lost"], ["ca_keo", "keo_neo"])  # floor(5/2) = 2, nhặt sau mất trước
-        self.assertEqual(s.sim.hold, hold[:3])
+        lost = hit[0]["data"]["lost"]  # floor(5/2) = 2, nhặt sau mất trước
+        self.assertEqual(([e["id"] for e in lost], kinds(lost)), (["I5", "I4"], ["ca_keo", "keo_neo"]))
+        self.assertEqual([it["id"] for it in s.sim.hold], ["I1", "I2", "I3"])
         self.assertEqual(s.sim.invuln_ticks, G["monsters"]["invuln_ticks"])
         m = s.sim.monsters[0]
         self.assertEqual((m["state"], m["state_ticks_left"]), ("recoil", CA_SAU["recoil_ticks"]))
@@ -149,14 +150,15 @@ class Crocodile(unittest.TestCase):
         self.assertNotEqual(s.sim.monsters[0]["state"], "recoil")
 
     def test_mau_ve_0_do_quai_thi_ngat(self):
-        sc = {"random_fish": False, "hold": ["ca_loc", "bong_sung", "ca_linh"],
+        sc = {"random_fish": False, "hold": items("ca_loc", "bong_sung", "ca_linh"),
               "player": {"pos": [51, 15], "hp": 1}, "monsters": [croc()]}
         s, evs = play(sc, 3)
         self.assertEqual(names(evs), ["monster_hit", "faint", "gather_end"])
-        self.assertEqual(evs[0]["data"]["lost"], ["ca_linh"])
-        self.assertEqual(evs[1]["data"], {"cause": "monster", "lost": ["bong_sung", "ca_loc"], "hp": 0})
+        self.assertEqual(kinds(evs[0]["data"]["lost"]), ["ca_linh"])
+        f = evs[1]["data"]
+        self.assertEqual((f["cause"], kinds(f["lost"]), f["hp"]), ("monster", ["bong_sung", "ca_loc"], 0))
         self.assertEqual(evs[2]["data"]["reason"], "fainted")
-        self.assertEqual(evs[2]["data"]["inventory"], {"items": {}})
+        self.assertEqual(evs[2]["data"]["inventory"], {"items": []})
 
     def test_snapshot_co_monsters(self):
         snap = play({}, 0)[0].snapshot()

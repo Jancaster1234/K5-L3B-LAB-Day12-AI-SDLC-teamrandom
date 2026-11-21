@@ -3,6 +3,8 @@
 import json
 import unittest
 
+from helpers import stock_items
+
 from chonoi.contract import load_contract
 from chonoi.inputs import LiveInputs
 from chonoi.runner import Session
@@ -43,10 +45,10 @@ class Burn(unittest.TestCase):
         self.assertEqual(s.sim.stoves[0]["state"], "idle")
 
     def test_chay_giu_lai_du_kho_thi_reserved(self):
-        s, evs = run({"stock": {"ca_loc": 1}, "stoves": ready_stove(BURN), "customers": ORDER}, 1)
+        s, evs = run({"stock": stock_items({"ca_loc": 1}), "stoves": ready_stove(BURN), "customers": ORDER}, 1)
         self.assertEqual(evs[0]["data"], {"stove_id": "B1", "order_id": "C1", "dish_id": DISH, "order_status": "reserved"})
         c = s.sim.customers[0]
-        self.assertEqual((c["order_status"], c["reserved"]), ("reserved", {"ca_loc": 1}))
+        self.assertEqual((c["order_status"], c["reserved"]), ("reserved", ["I1"]))
 
     def test_chay_thieu_kho_thi_unfulfillable_khach_van_cho(self):
         s, evs = run({"stoves": ready_stove(BURN), "customers": ORDER}, 1)

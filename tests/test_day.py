@@ -3,7 +3,7 @@
 import json
 import unittest
 
-from helpers import Workdir, events, frames, read_jsonl, run_headless, snapshots, write_json
+from helpers import count, items, Workdir, events, frames, read_jsonl, run_headless, snapshots, write_json
 
 with open("game.contract.json", encoding="utf-8") as _f:
     TUNING = json.load(_f)["tuning"]
@@ -49,20 +49,21 @@ class DayLoop(unittest.TestCase):
 
     def test_cap_ben_mo_quan_voi_kho_ban_giao(self):
         with Workdir() as w:
-            sc = {"gather": {"hold": ["ca_loc", "bong_sung", "bong_sung"], "random_fish": False}}
+            sc = {"gather": {"hold": items("ca_loc", "bong_sung", "bong_sung"), "random_fish": False}}
             code, err, rows = day(w, sc, [DOCK_NOW], ticks=1, every=1)
             self.assertEqual(code, 0, err)
             self.assertEqual([(r["phase"], r["name"]) for r in events(rows) if r["tick"] == 1],
                              [("gather", "gather_end"), ("quan", "phase_start")])
             s = snapshots(rows)[-1]
             self.assertEqual((s["phase"], s["phase_tick"]), ("quan", 0))
-            self.assertEqual(s["stock"], {"bong_sung": 2, "ca_loc": 1})
+            self.assertEqual(count(s["stock"]), {"bong_sung": 2, "ca_loc": 1})
+            self.assertEqual([e["id"] for e in s["stock"]], ["I1", "I2", "I3"])  # bàn giao giữ id
             for k in ("day", "day_plan", "upgrades", "active_upgrades"):
                 self.assertIn(k, s)
 
     def test_khach_chi_goi_mon_trong_ke_hoach(self):
         with Workdir() as w:
-            hold = ["ca_loc"] * 3 + ["ca_keo"] * 4  # ca_keo_nuong không thuộc kế hoạch D1
+            hold = items(*["ca_loc"] * 3 + ["ca_keo"] * 4)  # ca_keo_nuong không thuộc kế hoạch D1
             code, err, rows = day(w, {"gather": {"hold": hold, "random_fish": False}}, [DOCK_NOW],
                                   ticks=1 + Q["first_customer_tick"] + 900 * 3)
             self.assertEqual(code, 0, err)

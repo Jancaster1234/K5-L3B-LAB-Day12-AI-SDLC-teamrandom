@@ -69,3 +69,32 @@ class Workdir:
 
     def path(self, name):
         return os.path.join(self._d.name, name)
+
+
+# --- v1.2: kho/giỏ là mảng cá thể {id, kind, fresh} --------------------------------
+def items(*kinds, fresh=100, start=1):
+    """Dựng mảng cá thể I<start>, I<start+1>, … theo thứ tự (thứ tự vào giỏ)."""
+    return [{"id": f"I{start + i}", "kind": k, "fresh": fresh} for i, k in enumerate(kinds)]
+
+
+def kinds(lst):
+    """Mảng cá thể -> danh sách kind theo thứ tự (để so thứ tự giỏ / LIFO)."""
+    return [e["kind"] for e in lst]
+
+
+def count(lst):
+    """Mảng cá thể -> {kind: số} sắp theo kind (để so tổng hàng)."""
+    out = {}
+    for e in lst:
+        out[e["kind"]] = out.get(e["kind"], 0) + 1
+    return {k: out[k] for k in sorted(out)}
+
+
+def stock_items(counts, fresh=100, start=1):
+    """{kind: số} -> mảng cá thể (kind theo thứ tự khai báo, id I<start>…), cho scenario quan.stock v1.2."""
+    return items(*[k for k, n in counts.items() for _ in range(n)], fresh=fresh, start=start)
+
+
+def fresh_price(price, units_list):
+    """Giá chốt v1.2: floor(giá niêm yết × trung bình fresh / 100), fresh lưu theo đơn vị 1/240."""
+    return (price * sum(units_list)) // (len(units_list) * 100 * 240)
