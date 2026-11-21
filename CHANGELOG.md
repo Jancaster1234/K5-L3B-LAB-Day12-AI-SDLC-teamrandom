@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] - Phase 1
+## [Phase 1] - 2026-11-21
 
 ### Added
 - **Quán Lát 4 (`chonoi/sim/quan.py`)**:
@@ -12,6 +12,9 @@
 - **Hợp đồng tích hợp (`docs/contracts/quan.md`)**:
   - Chốt thứ tự gọi hàm trong `QuanSim.step()`.
   - Chốt schema trường của khách hàng (`Customer`) dùng chung cho Lát 3 và 4.
+- **Bằng chứng kiểm chứng Lát 4 (`docs/proof/phase-1/quan-lat4/`)**:
+  - Kịch bản 1: Bếp nấu chín sau 360 tick phát `dish_ready`.
+  - Kịch bản 2: Khách ăn trong 3 tick phát `paid` kèm tiền boa và tăng uy tín.
 - **Tiến độ Scrum/Release**:
   - Cập nhật biên bản standup giữa phase trong `docs/standup.md`.
-  - Điền thông tin thành viên Hoàng Ngọc Hiếu trong `TEAM.md` và `docs/members/hoangngochieu.md`.
+  - Hoàn thiện hồ sơ thành viên `TEAM.md` và `docs/members/hoangngochieu10012000.md`.
