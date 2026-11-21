@@ -1,0 +1,8 @@
+# verify-phase-proof (replay_lat1.py) chạy trên tag phase-1 (db70b7a) — commit bàn giao của bằng chứng lát 1
+# Trên HEAD (v1.3) fixture lát 1 dùng schema giỏ v1.0 nên trả mã 2 / output khác (đúng luật v1.2, Ticket-03);
+# hồi quy luật lát 1 trên HEAD được phủ bởi tests/test_gather_lat1.py đã chuyển sang kho cá thể.
+Python: 3.12.0
+PASS 01-oxy: HEAD archive == replay 1 == replay 2; SHA256=5ae10961f659c78f7d949664243b088719388ee432290708e23be0df836a828b
+PASS 02-choke: HEAD archive == replay 1 == replay 2; SHA256=db26a8dcad082a10ed98a757307cbb972517e7d019f42da1384c8e2cd12128b7
+PASS 03-faint: HEAD archive == replay 1 == replay 2; SHA256=f74557804ce408bf242f8190aba32bfc3a1ecb948bc4babe99020deaf5e969f2
+PASS 04-dive-surface: HEAD archive == replay 1 == replay 2; SHA256=98bbfa88fd8b2f9e4656fe51680c267b9ef708ece48aaadff5c2ce59c5cbb5fc

@@ -1,5 +1,15 @@
 # Changelog
 
+## [Phase 4] - 2026-11-21 — Test Contract v1.3 · Release v1.0.0
+
+### Added
+- `contract_version` 1.3: khai `bench_cmd` (`python3 -m chonoi.bench`, Đức Hải) và `soak_cmd` (`python3 -m chonoi.soak`, bot tất định).
+- Cửa sổ chơi: `--mode day` (gather → quán → Shop), pause `Esc/P`, Shop bằng phím, 3 cảnh báo có chữ + biểu tượng, chế độ tương phản cao `H`.
+- Tài liệu phát hành: README chạy từ clone sạch trong 3 lệnh, release notes, CREDITS (Hiệu); demo checklist (Tuấn); ma trận P4 và retro (Quang Hải).
+
+### Fixed
+- `chonoi.live` không còn sập khi in tiếng Việt trên console Windows (stdout cp1252).
+
 ## [Phase 3] - 2026-11-21 — Test Contract v1.2
 
 ### ⚠ Breaking change: kho đếm → kho cá thể

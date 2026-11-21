@@ -18,6 +18,9 @@ python3 -m chonoi.live --mode gather
 * **Tương tác:** `E` (hái cây, bỏ nguyên liệu vào bếp, lấy món chín, phục vụ bàn).
 * **Bắt cá:** `Space` (khi tiếp cận gần cá).
 * **Tạm dừng / Tiếp tục:** `Esc` hoặc `P`.
+* **Shop (chế độ `day`):** `1` mua Bình oxy, `2` mua Áo phao, `Enter` đóng Shop.
+* **Tương phản cao:** `H` (bật/tắt; cảnh báo Thủy quái / Hết hơi / Khách sắp giận hiện chữ vàng lớn).
+* **Chơi lại:** `R`.
 
 ### Công thức tính điểm
 $$\text{điểm} = \text{earned} + 100 \times \lfloor\text{reputation}\rfloor$$

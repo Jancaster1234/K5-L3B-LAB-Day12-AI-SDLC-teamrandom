@@ -1,0 +1,5 @@
+# Clone sạch (từ repo cục bộ, HEAD 12cea38) — Python 3.12.0, Windows 10
+$ git clone … && cd …  -> OK
+$ python3 -m chonoi.headless --mode day --days 1 -> exit 0 ; {"type":"end","ticks":22200,"sim_tick":22200,"mode":"day","state":"finished","reason":"days_complete","money":0,"earned":0,"reputation":3.0,"score":300,"days_completed":1}
+$ python3 -m chonoi.live --mode day -> (lần đầu: UnicodeEncodeError khi in tiếng Việt trên console cp1252 — đã sửa trong chonoi/live.py) ; sau sửa: Mở trình duyệt tại http://127.0.0.1:<cổng>/ (chế độ day)
+$ unittest discover -> OK

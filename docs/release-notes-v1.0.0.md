@@ -104,5 +104,7 @@ python3 -m chonoi.soak --seed 7 --days 10 --out soak.json
 ---
 
 ## 5. Giới hạn đã biết (Known Limitations)
-* **Giao diện đồ họa Live:** Cửa sổ chơi trên trình duyệt (`chonoi/live.py`) chạy trực tiếp vào gameplay mô phỏng Canvas 2D, chưa có màn hình Menu chính (Start Menu), màn hình Giới thiệu cốt truyện (Intro / Story Screen), và chưa có giao diện Shop dạng đồ họa click chuột trực quan (tuy nhiên logic Shop mua hàng giữa các ngày ở chế độ headless/day inputs đã được cài đặt và kiểm thử 100%).
+* **Giao diện đồ họa Live:** Cửa sổ chơi trên trình duyệt (`chonoi/live.py`) chạy trực tiếp vào gameplay mô phỏng Canvas 2D, chưa có màn hình Menu chính (Start Menu), DayIntro / EveningIntro / DayResult / Summary. Shop có màn hình dùng bàn phím (`1`/`2` mua, `Enter` đóng), chưa có thao tác chuột. Đồ họa là hình khối 2D tạm.
+* **Benchmark:** `bench_cmd` vẽ phần mềm vào framebuffer 1280×720 trong tiến trình, không mở cửa sổ thật; số FPS chỉ dùng để báo cáo.
+* **Mở rộng P3** (dòng lũ, khách đặt trước) và các mở rộng P2 khác ngoài `burn`: không làm.
 * **Mở rộng Phase 3:** Nhóm không làm phần mở rộng tùy chọn của Phase 3 nhằm bảo đảm tính tương thích tuyệt đối của cơ chế chuyển đổi kho cá thể và độ tươi theo Test Contract v1.2.
