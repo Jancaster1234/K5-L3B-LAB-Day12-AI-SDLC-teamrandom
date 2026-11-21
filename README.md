@@ -14,12 +14,13 @@ python3 -m chonoi.live --mode gather
   - Cả ngày: `python3 -m chonoi.live --mode day`
 
 ### Điều khiển
+* **Màn phủ:** game mở bằng Menu; chế độ `day` có thêm DayIntro (thực đơn + cần lấy), Buổi tối (kho mang về), Kết quả Ngày và Tổng kết. Game tự tạm dừng khi màn phủ mở, `Enter` để đi tiếp.
 * **Di chuyển:** `WASD` hoặc các phím mũi tên.
 * **Tương tác:** `E` (hái cây, bỏ nguyên liệu vào bếp, lấy món chín, phục vụ bàn).
 * **Bắt cá:** `Space` (khi tiếp cận gần cá).
 * **Tạm dừng / Tiếp tục:** `Esc` hoặc `P`.
 * **Shop (chế độ `day`):** `1` mua Bình oxy, `2` mua Áo phao, `Enter` đóng Shop.
-* **Tương phản cao:** `H` (bật/tắt; cảnh báo Thủy quái / Hết hơi / Khách sắp giận hiện chữ vàng lớn).
+* **Tương phản cao:** `H` hoặc mở `http://…/?hc=1` (bật/tắt; cảnh báo Thủy quái / Hết hơi / Khách sắp giận hiện chữ vàng lớn).
 * **Chơi lại:** `R`.
 
 ### Công thức tính điểm

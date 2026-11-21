@@ -6,6 +6,9 @@
 - Cảnh báo oxy dùng emoji 🫧 (Unicode 14) hiện thành ô vuông trên Windows 10 → đổi sang ⚠️ / 💨.
 
 ### Added
+- Màn phủ trên cửa sổ chơi: Menu, DayIntro (thực đơn + cần lấy), Buổi tối (kho mang về), Kết quả Ngày, Tổng kết nhiều Ngày; game tự tạm dừng khi màn mở, `Enter` đi tiếp. `/state` của live (chế độ day) có thêm `history`, `days_total` (headless không đổi) + test.
+- `?hc=1` mở thẳng chế độ tương phản cao.
+- Skill `ui-screenshot-check`: bot chơi trọn một Ngày, bấm phím thật qua Edge DevTools, chụp từng màn.
 - Bằng chứng giao diện `docs/proof/phase-4/ui/` (ảnh 3 cảnh báo + ba cảnh), clone sạch từ GitHub và chạy suite tại từng tag (`docs/proof/phase-4/qa/clean-clone.txt`).
 
 ## [v1.1.0] - 2026-11-21 — Đồ họa (Test Contract vẫn v1.3)

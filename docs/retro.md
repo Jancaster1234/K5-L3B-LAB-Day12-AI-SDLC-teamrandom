@@ -39,4 +39,4 @@
 ## Sau phát hành (Integrator `Jancaster1234`, 2026-11-21 tối)
 - **Đã làm:** Release v1.1.0 chỉ đổi client (đồ họa ba cảnh, asset Kenney CC0), luật/contract/headless giữ nguyên; chạy lại suite tại cả 5 tag và clone sạch từ GitHub để chắc "chạy được tại từng tag".
 - **Học được:** kiểm giao diện bằng ảnh chụp thật bắt được lỗi mà test không thấy (emoji 🫧 thành ô vuông trên Windows 10, chữ đè quầy bếp, quầy Shop tràn mép). Lần sau đưa bước chụp ảnh vào checklist QA ngay từ Phase 2, không để tới sau demo.
-- **Còn mở:** ảnh chế độ tương phản cao, Menu/DayIntro/Summary, mở rộng P3. (Phản tư `ndhai255`: Đức Hải đã tự viết, PR #5.)
+- **Còn mở:** mở rộng P3; Shop chưa có thao tác chuột. (Đã xong sau đó: Menu/DayIntro/Buổi tối/Kết quả/Tổng kết, ảnh tương phản cao, clone sạch trên Linux.) (Phản tư `ndhai255`: Đức Hải đã tự viết, PR #5.)

@@ -42,7 +42,7 @@ git log -1 --oneline
 .\.venv\Scripts\python.exe -m chonoi.live --mode day --port 8765
 ```
 
-Mở http://127.0.0.1:8765/. Phím: `WASD`/mũi tên, `E` tương tác, `Space` bắt cá, `Esc`/`P` tạm dừng,
+Mở http://127.0.0.1:8765/ → Menu → `Enter` → DayIntro → `Enter` vào lặn. Phím: `WASD`/mũi tên, `E` tương tác, `Space` bắt cá, `Esc`/`P` tạm dừng,
 `H` tương phản cao, Shop `1`/`2`/`Enter`, `R` chơi lại.
 
 - [ ] **Lặn:** hái hoa ở mặt nước (`E`), lặn bắt cá (`Space`); chỉ thanh oxy, Máu, hồi chiêu,
@@ -110,7 +110,7 @@ Get-Content .local/demo/bench.json
 - [ ] README (chạy ≤ 3 lệnh), [release notes v1.1.0](release-notes-v1.1.0.md), [CREDITS](../CREDITS.md) (asset Kenney CC0).
 - [ ] `docs/ai-usage-log.md`, `docs/members/*.md`, `git shortlog -sn` cho đánh giá chéo.
 - [ ] Nói trung thực phần còn thiếu:
-  - chưa có Menu chính, DayIntro / DayResult / Summary; Shop chỉ thao tác bàn phím;
+  - Menu / DayIntro / Buổi tối / Kết quả Ngày / Tổng kết đã có (sau v1.1.0); Shop chỉ thao tác bàn phím, chưa có chuột;
   - mở rộng P3 (dòng lũ, khách đặt trước) chưa làm; mở rộng P2 chỉ có `burn`;
   - `chonoi/live.py` (file khung) có thêm route `/assets` để tải ảnh;
   - cảnh lặn vector, cảnh quán/Shop pixel art; log sự kiện có thể đè góc phải dưới ở cửa sổ nhỏ.

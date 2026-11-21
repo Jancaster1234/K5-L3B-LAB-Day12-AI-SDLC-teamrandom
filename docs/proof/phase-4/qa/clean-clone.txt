@@ -11,3 +11,11 @@ $ PYTHONPATH="tests;." python3 -m unittest discover -s tests -> exit 0 ; Ran 150
 
 # Chạy lại suite tại từng tag (git worktree, cùng ngày)
 phase-1 (db70b7a): 78 tests OK · phase-2 (568d0d9): 127 tests OK · phase-3 (4c78cee): 140 tests OK · phase-4 (481e0ad): 149 tests OK · v1.1.0 (a850660): 150 tests OK
+
+# Clone sạch trên Linux — Ubuntu (WSL2, kernel 5.15.167.4-microsoft-standard-WSL2), Python 3.12.3, git 2.43.0, HEAD ef268eb, 2026-11-21
+# Đúng 3 lệnh của README (clone → cd → live) + headless + suite:
+$ git clone https://github.com/Jancaster1234/K5-L3B-LAB-Day12-AI-SDLC-teamrandom.git && cd K5-L3B-LAB-Day12-AI-SDLC-teamrandom -> OK
+$ python3 -m chonoi.live --mode gather --port 8799 -> "Mở trình duyệt tại http://127.0.0.1:8799/ (chế độ gather, seed 1)"; GET / -> HTTP 200
+$ python3 -m chonoi.headless --mode day --seed 1 --days 1 --ticks 30000 --out /tmp/day.jsonl -> exit 0 ; {"type":"end","ticks":22200,...,"reason":"days_complete","days_completed":1}
+$ PYTHONPATH=tests:. python3 -m unittest discover -s tests -> exit 0 ; Ran 150 tests, OK
+# Chưa thử macOS.
