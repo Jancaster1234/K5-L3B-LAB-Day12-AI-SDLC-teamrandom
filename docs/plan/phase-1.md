@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 1 | Gather lát 1: dive/surface, oxy, oxygen_empty, choke, Máu, faint (giỏ rỗng) | `gather.py`: `_update_oxygen(prev_pos, events)` gọi sau `_move`, trả `True` nếu ngất | scenario `player.oxygen_ticks/hp/zero_oxy_ticks` |
 | 2 | Gather lát 2: hái nút ở mặt nước, regrow, bắt cá (cooldown, dưới nước), hold_full | `gather.py`: `_harvest(events)`, `_catch(events)` | scenario `nodes`, `fish`, `hold`, `player.pos` |
-| 3 | Quan lát 3: khách theo lịch, chọn món nấu được, giữ chỗ, kiên nhẫn, customer_left, no_dish | `quan.py`: `_spawn_customers(events)`, `_tick_patience(events)`, `_reserve(...)` | scenario `stock`, `time_left_ticks` |
+| 3 | Quan lát 3: khách theo lịch, chọn món nấu được, giữ chỗ, kiên nhẫn, customer_left, no_dish | `quan.py`: `_spawn_customers(events)`, `_tick_patience(events)`, `_available()`, `_release(customer)` | scenario `stock`, `time_left_ticks`, `customers`, `random_customers` (`tests/test_quan_lat3.py`) |
 | 4 | Quan lát 4: interact bếp/bàn (cook_started, dish_ready, dish_picked, served), ăn xong, paid, boa, uy tín, quan_end | `quan.py`: `_tick_stoves`, `_tick_eating`, `_interact(events)` | scenario `customers[]` dựng sẵn, `stoves`, `hand`, `stock` |
 | 5 | QA + harness + UI: test tích hợp gather → kho → quan, tất định cùng seed, verification/proof, 2 skill `.agents/skills/`, `AGENTS.md`, `ai-usage-log`, HUD `chonoi/web/` | `tests/test_*_integration.py`, `docs/`, `.agents/`, `chonoi/web/` | headless + file kho |
 

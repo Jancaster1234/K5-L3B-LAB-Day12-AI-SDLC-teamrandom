@@ -1,7 +1,6 @@
 # Hợp đồng tích hợp — Phase 1 (contract v1.0)
 
-> Người giữ: Integrator (Jancaster1234). Đổi mục nào thì báo cả nhóm trên Discord và ghi lý do (ADR ở `docs/adr/`).
-> **⚠ PRD-0** = tên/trường do PRD-0 quyết định; PO (HaiVuQ) đối chiếu với PRD-0 rồi sửa ở đây. PRD-0 thắng nếu khác.
+> Người giữ: Integrator (Jancaster1234) · Đối chiếu & chốt PRD-0: PO (HaiVuQ, xem `docs/clarify.md` #1–#10). Đổi mục nào thì báo cả nhóm trên Discord và ghi lý do (ADR ở `docs/adr/`).
 > Số liệu luôn đọc từ `game.contract.json` (`tuning.*`), không hard-code.
 
 ## 1. File kho (PRD-0 mục G) — đã cố định bởi `chonoi/inventory.py`
