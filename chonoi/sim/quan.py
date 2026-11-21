@@ -38,7 +38,8 @@ class QuanSim:
     mode = "quan"
     phase = "quan"
 
-    def __init__(self, tuning, scenario, streams, ids, inventory=None):
+    def __init__(self, tuning, scenario, streams, ids, inventory=None, reputation=None, money=0, earned=0,
+                 menu_ids=None, day=None):
         t = tuning["quan"]
         self.t = t
         self.menu = tuning["menu"]
@@ -56,7 +57,10 @@ class QuanSim:
         self.patience_full = int(round(t["patience_s"] * TICK))
         self.random_customers = scenario.get("random_customers", True)
         self.time_left_ticks = scenario.get("time_left_ticks", int(round(t["duration_s"] * TICK)))
-        self.reputation = float(scenario.get("reputation", t["reputation_initial"]))
+        self.reputation = float(reputation if reputation is not None else scenario.get("reputation", t["reputation_initial"]))
+        # day: khách chọn trong các món của kế hoạch Ngày (Ticket-02 mục 2); quán chạy riêng dùng cả menu
+        self.menu_ids = sorted(menu_ids) if menu_ids is not None else sorted(self.menu)
+        self.day = day
         self.hand = self._payload(scenario.get("hand"), "hand")
         self.stoves = []
         for s in self._merge(t["stoves"], scenario.get("stoves", [])):
@@ -68,11 +72,16 @@ class QuanSim:
         self.customers = self._init_customers(scenario.get("customers", []))
         for c in self.customers:
             ids.reserve(c["id"])
-        self.money = 0
-        self.earned = 0
+        self.money = money
+        self.earned = earned
         self.shift_earned = 0
         self.done = False
         self.reason = None
+        # số liệu cho DayResult / Summary (không thuộc Test Contract)
+        self.served_count = 0
+        self.left_count = 0
+        self.tips = 0
+        self.sold = {}
 
     # --- dựng từ scenario (PRD-0 mục D, clarify #10) --------------------------------
     @staticmethod
@@ -237,7 +246,7 @@ class QuanSim:
 
     def _cookable_dishes(self) -> list:
         avail = self._available()
-        return [d for d in sorted(self.menu)
+        return [d for d in self.menu_ids
                 if all(avail.get(k, 0) >= q for k, q in self.menu[d]["recipe"].items())]
 
     def _spawn_customers(self, events):
@@ -349,6 +358,9 @@ class QuanSim:
         self.money += amount
         self.earned += amount
         self.shift_earned += amount
+        self.served_count += 1
+        self.tips += c["tip"]
+        self.sold[c["dish_id"]] = self.sold.get(c["dish_id"], 0) + 1
         if c["tip"] > 0:
             self.reputation = self._clamp_rep(self.reputation + float(self.t["tip_reputation"]))
         self.customers.remove(c)
@@ -356,6 +368,7 @@ class QuanSim:
                                 "tip": c["tip"], "amount": amount, "reason": reason}))
 
     def _leave(self, c, reason, events):
+        self.left_count += 1
         if reason == "patience":
             self.reputation = self._clamp_rep(self.reputation + float(self.t["left_reputation_delta"]))
         c["reserved"] = {}  # nhả giữ chỗ
