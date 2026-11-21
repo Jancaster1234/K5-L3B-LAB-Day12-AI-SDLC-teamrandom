@@ -1,0 +1,85 @@
+﻿python3 : test_du_chu_ky_thi_tru_mau (test_gather_lat1.Choke) ... ok
+At line:9 char:1
++ python3 -m unittest discover -s tests -v 2>&1 | Out-File -FilePath "$ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (test_du_chu_ky_...1.Choke) ... ok:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+test_moc_thoi_gian_choke_tu_luc_het_oxy (test_gather_lat1.Choke) ... ok
+test_noi_len_reset_dem_ngat (test_gather_lat1.Choke) ... ok
+test_cung_dau_vao_cung_ket_qua (test_gather_lat1.Determinism) ... ok
+test_mau_ve_0_thi_ngat_mat_gio (test_gather_lat1.Faint) ... ok
+test_ngat_ghi_kho_rong (test_gather_lat1.Faint) ... ok
+test_ngat_xet_truoc_cap_ben (test_gather_lat1.Faint) ... ok
+test_duoi_nuoc_tru_1_moi_tick (test_gather_lat1.Oxygen) ... ok
+test_mat_nuoc_hoi_oxy_va_kep_tran (test_gather_lat1.Oxygen) ... ok
+test_oxygen_empty_dung_mot_lan (test_gather_lat1.Oxygen) ... ok
+test_dive_khi_xuong_duoi_mat_nuoc (test_gather_lat1.Zones) ... ok
+test_dung_yen_khong_phat_dive_surface (test_gather_lat1.Zones) ... ok
+test_bat_ca_duoi_nuoc (test_gather_lat2.Catch) ... ok
+test_ca_nhieu_hon_cho_trong_nhan_mot_phan (test_gather_lat2.Catch) ... ok
+test_gio_day_ca_o_lai (test_gather_lat2.Catch) ... ok
+test_hoi_chieu (test_gather_lat2.Catch) ... ok
+test_ngoai_ban_kinh_khong_bat (test_gather_lat2.Catch) ... ok
+test_o_mat_nuoc_khong_bat (test_gather_lat2.Catch) ... ok
+test_ben_xet_truoc_hai (test_gather_lat2.Harvest) ... ok
+test_chon_nut_gan_nhat_hoa_thi_id_nho (test_gather_lat2.Harvest) ... ok
+test_duoi_nuoc_khong_hai (test_gather_lat2.Harvest) ... ok
+test_gio_day_hold_full_nut_giu_nguyen (test_gather_lat2.Harvest) ... ok
+test_gio_lifo_va_kho_khi_cap_ben (test_gather_lat2.Harvest) ... ok
+test_hai_nut_o_mat_nuoc (test_gather_lat2.Harvest) ... ok
+test_ngoai_ban_kinh_khong_hai (test_gather_lat2.Harvest) ... ok
+test_nut_chua_moc_khong_hai_moc_xong_thi_hai (test_gather_lat2.Harvest) ... ok
+test_state_input_and_clean_stop (test_live.LiveServerTest) ... ok
+test_bad_frames_raise (test_python_starter_units.Units) ... ok
+test_catch_is_a_v10_button_and_attack_is_not (test_python_starter_units.Units) ... ok
+test_id_allocator_continues_after_max (test_python_starter_units.Units) ... ok
+test_id_sorting (test_python_starter_units.Units) ... ok
+test_input_edges_and_inherit (test_python_starter_units.Units) ... ok
+test_live_inputs_keep_fast_tap_edge (test_python_starter_units.Units) ... ok
+test_session_steps_gather_and_dock (test_python_starter_units.Units) ... ok
+test_giam_kien_nhan_moi_tick_va_bo_di_khi_ve_0 (test_quan_lat3.PatienceAndLeave) ... ok
+test_khach_cu_bo_di_nha_ban_va_kho_kip_cho_khach_moi_cung_tick (test_quan_lat3.PatienceAndLeave) ... ok
+test_khach_eating_khong_bi_tru_kien_nhan (test_quan_lat3.PatienceAndLeave) ... ok
+test_uy_tin_kep_khong_am_khi_nhieu_khach_bo_di (test_quan_lat3.PatienceAndLeave) ... ok
+test_headless_tat_dinh_cung_seed (test_quan_lat3.ScenarioValidationAndHeadless) ... ok
+test_khach_waiting_giu_cho_qua_kho_exit_2 (test_quan_lat3.ScenarioValidationAndHeadless) ... ok
+test_khach_waiting_hop_le_khi_mon_da_o_tren_bep_hoac_tay (test_quan_lat3.ScenarioValidationAndHeadless) ... ok
+test_giu_cho_lam_khach_sau_het_mon_phat_no_dish (test_quan_lat3.SpawnAndReserve) ... ok
+test_het_ban_trong_khong_sinh_them_va_khong_phat_no_dish (test_quan_lat3.SpawnAndReserve) ... ok
+test_khach_den_dung_first_customer_tick_va_giu_cho (test_quan_lat3.SpawnAndReserve) ... ok
+test_khong_du_nguyen_lieu_phat_no_dish (test_quan_lat3.SpawnAndReserve) ... ok
+test_random_customers_false_tat_sinh_khach_theo_lich (test_quan_lat3.SpawnAndReserve) ... ok
+test_con_01_ticks_zero_and_end_line (test_smoke_p1.Contract) ... ok
+test_con_02_deterministic_bytes (test_smoke_p1.Contract) ... ok
+test_con_03_bad_input_exit_2 (test_smoke_p1.Contract) ... ok
+test_con_03_old_and_future_modes_rejected (test_smoke_p1.Contract) ... ok
+test_gather_snapshot_has_gather_fields (test_smoke_p1.Contract) ... ok
+test_scenario_out_of_domain_exit_2 (test_smoke_p1.Contract) ... ok
+test_inv_01_gather_writes_inventory_quan_reads_it (test_smoke_p1.Integration)
+Ví dụ smoke test trong PRD-0 mục G: cập bến ở tick 0, quán đọc kho đúng nội dung. ... ok
+test_inv_01_not_written_when_tick_limit_first (test_smoke_p1.Integration) ... ok
+test_inv_bad_schema_exit_2 (test_smoke_p1.Integration) ... ok
+test_inventory_and_scenario_stock_conflict (test_smoke_p1.Integration) ... ok
+test_inventory_flags_mode_mismatch_exit_2 (test_smoke_p1.Integration) ... ok
+test_move_01_swim_speed_after_ramp (test_smoke_p1.Movement)
+Bỏ 6 tick tăng tốc rồi đo 60 tick: quãng ≈ swim_speed × 1 s (±0.1). Ngang, xuống, chéo (không nhanh hơn). ... ok
+test_move_02_heading_positive_is_down (test_smoke_p1.Movement) ... ok
+test_move_03_edge_clamp (test_smoke_p1.Movement)
+Chặn từng mép của vùng nước, kể cả d không âm (không bay lên khỏi mặt nước) và đáy d = 30. ... ok
+test_move_mep_vel_ve_0 (test_smoke_p1.Movement) ... ok
+test_move_ramp_doi_huong_trong_tran (test_smoke_p1.Movement)
+Đảo từ +speed sang -speed: vận tốc chạm mục tiêu sau tối đa ramp_max_ticks tick kể từ lúc đổi input. ... ok
+test_time_ends_gather_and_keeps_hold (test_smoke_p1.Movement) ... ok
+test_khoi_sai_mode_exit_2 (test_smoke_p1.ScenarioModes) ... ok
+test_quan_fixture_khong_hop_le_exit_2 (test_smoke_p1.ScenarioModes) ... ok
+test_quan_player_vel_hop_le (test_smoke_p1.ScenarioModes) ... ok
+test_good (test_team_check.TeamCheck) ... ok
+test_template_is_rejected (test_team_check.TeamCheck) ... ok
+test_too_few_members (test_team_check.TeamCheck) ... ok
+test_wrong_size_duplicate_and_outsider (test_team_check.TeamCheck) ... ok
+
+----------------------------------------------------------------------
+Ran 70 tests in 22.863s
+
+OK
