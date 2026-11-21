@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] - sau v1.1.0
+## [v1.2.0] - 2026-11-21 — Màn phủ cửa sổ chơi (Test Contract vẫn v1.3)
 
 ### Fixed
 - Cảnh báo oxy dùng emoji 🫧 (Unicode 14) hiện thành ô vuông trên Windows 10 → đổi sang ⚠️ / 💨.
