@@ -39,5 +39,5 @@
 | [06-summary](screens/06-summary.png) | Tổng kết 1 Ngày: bảng từng Ngày, "Điểm cuối: 386 = 86 + 100 × 3" |
 
 ## Chưa có
-- Ảnh chụp trên macOS; thao tác chuột ở Shop (chỉ bàn phím).
+- Ảnh chụp trên macOS.
 - `shop-mock.png` ở bảng trên là ảnh cũ từ snapshot dựng sẵn; nay đã có [05-shop](screens/05-shop.png) từ lượt chơi thật.

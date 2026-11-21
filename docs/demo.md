@@ -110,7 +110,7 @@ Get-Content .local/demo/bench.json
 - [ ] README (chạy ≤ 3 lệnh), [release notes v1.1.0](release-notes-v1.1.0.md), [CREDITS](../CREDITS.md) (asset Kenney CC0).
 - [ ] `docs/ai-usage-log.md`, `docs/members/*.md`, `git shortlog -sn` cho đánh giá chéo.
 - [ ] Nói trung thực phần còn thiếu:
-  - Menu / DayIntro / Buổi tối / Kết quả Ngày / Tổng kết đã có (sau v1.1.0); Shop chỉ thao tác bàn phím, chưa có chuột;
+  - Menu / DayIntro / Buổi tối / Kết quả Ngày / Tổng kết đã có (sau v1.1.0);
   - mở rộng P3 (dòng lũ, khách đặt trước) chưa làm; mở rộng P2 chỉ có `burn`;
   - `chonoi/live.py` (file khung) có thêm route `/assets` để tải ảnh;
   - cảnh lặn vector, cảnh quán/Shop pixel art; log sự kiện có thể đè góc phải dưới ở cửa sổ nhỏ.
