@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.1.0] - 2026-11-21 — Đồ họa (Test Contract vẫn v1.3)
+
+### Added
+- Cảnh lặn: sprite Kenney Fish Pack (CC0) cho cá, đáy cát, rong, đá, bọt khí; vẽ Út Sen (nón lá / bình oxy) và Cá Sấu (trước đây client chưa vẽ).
+- Cảnh quán: tilesheet Kenney Roguelike Indoors/Characters (CC0): bếp có lửa, bàn ghế, khách, bong bóng gọi món tên tiếng Việt, thanh kiên nhẫn đổi màu, tô món bốc khói.
+- Shop: tiệm đồ lặn với chủ tiệm, kệ trưng bày, thẻ nâng cấp (hiệu quả hiện tại / cấp kế, giá, tối đa, hiệu lực từ Ngày kế), thông báo `bought` / `buy_failed`.
+- `chonoi/live.py`: route `GET /assets/<file>` (chặn thoát thư mục) + test. Luật, contract, headless không đổi.
+
 ## [Phase 4] - 2026-11-21 — Test Contract v1.3 · Release v1.0.0
 
 ### Added
