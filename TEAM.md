@@ -8,7 +8,7 @@
 |Nguyễn Đức Hải |ndhai255 | `sim/gather` — lát 2: hái nút, bắt cá, giỏ đầy | Dev | lát 1, Integrator (gắn tag nếu vắng) |
 |Vũ Quang Hải |HaiVuQ | `sim/quan` — lát 3: khách, giữ chỗ, kiên nhẫn | PO (đọc PRD trên lab board, hỏi giảng viên, giữ `docs/clarify.md`, viết `docs/plan/`) | lát 4 |
 |Hoàng Ngọc Hiệu |hoangngochieu10012000 | `sim/quan` — lát 4: bếp, bàn, trả tiền, boa, uy tín | Scrum/Release (`docs/standup.md`, `CHANGELOG.md`, Release) | lát 3 |
-|Nguyễn Văn Tuấn |tuannguyen-cell | `qa` + `client/ui` + harness AI (**đã nghỉ, 2026-11-21, giữa Phase 1**) | QA lead tới khi nghỉ: skill `run-phase-qa`, `verify-phase-proof`, hướng dẫn Windows, verification Phase 1. Việc còn lại chuyển cho Jancaster1234 | — |
+|Nguyễn Văn Tuấn |tuannguyen-cell | `qa` + harness AI (nghỉ giữa Phase 1, **đã quay lại** sau tag `phase-1`) | Skill `run-phase-qa`, `verify-phase-proof`, hướng dẫn Windows, verification Phase 1; sau khi quay lại: `AGENTS.md` (skills) + `docs/demo.md`. QA lead vẫn do Jancaster1234 giữ | `client/ui` |
 
 **Vai quy trình:** PO (đầu mối hỏi giảng viên, giữ `docs/clarify.md`) · Integrator (giữ `docs/contracts/`, gắn tag) · QA lead · Scrum/Release. Có thể kiêm.
 
@@ -20,5 +20,5 @@
 - Giờ standup giữa phase: giữa mỗi phase 3 phút, Scrum ghi vào `docs/standup.md`.
 - Không chờ nhau: mỗi lát sở hữu hàm riêng (xem `docs/plan/phase-1.md`), tự viết test cho lát mình bằng scenario dựng sẵn; QA đọc commit trước khi tag.
 - Cách làm việc với Git: nhánh ngắn theo lát (`gather-lat1`, `quan-lat3`…), chạy test rồi gộp vào `main`; chỉ Integrator gắn tag `phase-n`.
-- Đổi nhân sự: Tuấn nghỉ giữa Phase 1; giữ tên trong bảng vì commit đã làm vẫn tính. Việc QA chuyển cho trưởng nhóm, người dự phòng gắn tag là Đức Hải.
+- Đổi nhân sự: Tuấn nghỉ giữa Phase 1 rồi quay lại sau tag `phase-1`; giữ tên trong bảng. QA lead do trưởng nhóm giữ, người dự phòng gắn tag là Đức Hải.
 - Mỗi người ≥ 3 commit có nội dung bằng tài khoản của mình; làm cặp thì ghi `Co-authored-by:`.

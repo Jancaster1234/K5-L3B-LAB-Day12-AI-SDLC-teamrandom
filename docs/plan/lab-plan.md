@@ -19,7 +19,8 @@ Test ẩn (25) chạy lại cả phase trước, nên làm **lõi Test Contract 
 | 9 | `bench_cmd` (cảnh lặn 1280×720, `bench.json`) | P4 | **Đức Hải** | chỉ cần `GatherSim` |
 | 10 | HUD/menu/pause, 3 cảnh báo + chế độ tương phản cao | P2/P4 | Phúc | 5 |
 | 11 | Ma trận AC `docs/verification/phase-2/3/4.md`, `clarify.md`, `retro.md` | P2–P4 | **Quang Hải** | — (docs) |
-| 12 | README (chạy ≤ 3 lệnh, điều khiển, điểm, test, headless, bench, Sáng tạo của nhóm), CHANGELOG theo phase, CREDITS/LICENSE, nháp release notes, kịch bản demo | P1–P4 | **Hiệu** | — (docs) |
+| 12 | README (chạy ≤ 3 lệnh, điều khiển, điểm, test, headless, bench, Sáng tạo của nhóm), CHANGELOG theo phase, CREDITS/LICENSE, nháp release notes | P1–P4 | **Hiệu** | — (docs) |
+| 12b | `AGENTS.md` mục "Skills / hooks của nhóm" (2 skill QA, khi nào dùng, lệnh Windows) + `docs/demo.md` (checklist demo Ticket-04 kèm lệnh) | P4 | **Tuấn** (đã quay lại) | — (docs) |
 | 13 | Tag `phase-2/3/4`, Release `v1.0.0` + bản đóng gói | P2–P4 | Phúc | tất cả |
 | 14 | `docs/members/<handle>.md`, dòng của mình trong `ai-usage-log.md` | — | **mỗi người** | — |
 
@@ -27,7 +28,8 @@ Test ẩn (25) chạy lại cả phase trước, nên làm **lõi Test Contract 
 - Chỉ Integrator sửa `chonoi/`, `game.contract.json`, `tests/` (trừ file test riêng của việc #9).
 - Đức Hải chỉ tạo file mới: `chonoi/bench.py`, `tests/test_bench.py`, `docs/proof/phase-4/bench/`.
 - Quang Hải chỉ sửa `docs/verification/`, `docs/clarify.md`, `docs/retro.md`, `docs/plan/`.
-- Hiệu chỉ sửa `README.md`, `CHANGELOG.md`, `CREDITS.md`, `docs/release-notes-v1.0.0.md`, `docs/demo.md`.
+- Hiệu chỉ sửa `README.md`, `CHANGELOG.md`, `CREDITS.md`, `docs/release-notes-v1.0.0.md`.
+- Tuấn chỉ sửa mục "Skills / hooks của nhóm" trong `AGENTS.md` và tạo `docs/demo.md`.
 - Mỗi người làm trên nhánh riêng, push nhánh rồi báo Integrator gộp.
 
 ## Rủi ro
