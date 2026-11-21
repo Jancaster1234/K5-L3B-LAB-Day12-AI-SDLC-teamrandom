@@ -511,17 +511,107 @@ function drawQuan(w, h) {
 }
 
 // ----- Shop (day): mua nâng cấp, đóng Shop -----
+// Icon vẽ tay cho 2 món hàng (cỡ theo `r` px)
+function iconTank(x, y, r) {
+  ctx.fillStyle = "#cfd8dc"; ctx.strokeStyle = "#455a64"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - r * 0.38, y - r * 0.7, r * 0.76, r * 1.6, r * 0.36) : ctx.rect(x - r * 0.38, y - r * 0.7, r * 0.76, r * 1.6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#4fc3f7"; ctx.fillRect(x - r * 0.38 + 2, y - r * 0.05, r * 0.76 - 4, r * 0.3);                     // vạch xanh
+  ctx.fillStyle = "#37474f"; ctx.fillRect(x - r * 0.12, y - r * 0.95, r * 0.24, r * 0.28);                            // van
+  ctx.fillRect(x - r * 0.3, y - r * 1.0, r * 0.6, r * 0.1);
+  ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.fillRect(x - r * 0.25, y - r * 0.5, r * 0.08, r * 1.1);                 // ánh sáng
+}
+function iconVest(x, y, r) {
+  ctx.fillStyle = "#ff7043"; ctx.strokeStyle = "#bf360c"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x - r * 0.25, y - r * 0.9); ctx.lineTo(x - r * 0.7, y - r * 0.6); ctx.lineTo(x - r * 0.75, y + r * 0.85); ctx.lineTo(x - r * 0.08, y + r * 0.85);
+  ctx.lineTo(x - r * 0.08, y - r * 0.3); ctx.lineTo(x + r * 0.08, y - r * 0.3); ctx.lineTo(x + r * 0.08, y + r * 0.85); ctx.lineTo(x + r * 0.75, y + r * 0.85);
+  ctx.lineTo(x + r * 0.7, y - r * 0.6); ctx.lineTo(x + r * 0.25, y - r * 0.9); ctx.quadraticCurveTo(x, y - r * 0.55, x - r * 0.25, y - r * 0.9);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#eceff1"; ctx.fillRect(x - r * 0.72, y + r * 0.1, r * 1.44, r * 0.14); ctx.fillRect(x - r * 0.73, y + r * 0.45, r * 1.46, r * 0.14);  // dải phản quang
+  ctx.fillStyle = "#263238"; ctx.fillRect(x - r * 0.14, y + r * 0.12, r * 0.28, r * 0.1); ctx.fillRect(x - r * 0.14, y + r * 0.47, r * 0.28, r * 0.1);  // khóa
+}
+function coin(x, y, r) {
+  ctx.fillStyle = "#ffca28"; ctx.strokeStyle = "#c79100"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  text("đ", x, y + r * 0.45, { size: r * 1.3, align: "center", color: "#8d6e00" });
+}
+function rrect(x, y, wd, ht, rad) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, wd, ht, rad) : ctx.rect(x, y, wd, ht); }
+
+// ----- Shop (day): tiệm đồ lặn — mua nâng cấp, đóng Shop -----
 function drawShop(w, h) {
-  text("🛒 Shop — Ngày " + (snap.day || 1), 14, 34, { size: 24 });
-  text(`Tiền ${snap.money ?? 0}k · tổng thu ${snap.earned ?? 0}k · uy tín ${(snap.reputation ?? 0).toFixed(1)} · tự đóng sau ${Math.ceil((snap.time_left_ticks || 0) / 60)}s`, 14, 64, { size: 18 });
-  const up = snap.upgrades || {}, meta = snap.meta || {};
-  const rows = [["1", "oxygen", "Bình oxy"], ["2", "hp", "Áo phao (thêm Máu)"]];
-  rows.forEach(([key, id, name], i) => {
-    const lvl = up[id] || 0, next = ((meta.upgrades || {})[id] || []).find((e) => e.level === lvl + 1);
-    const info = next ? `cấp ${lvl} → ${lvl + 1}: ${next.price}k` : `cấp ${lvl} (tối đa)`;
-    text(`[${key}] ${name}: ${info}`, 34, 110 + i * 34, { size: 20, color: next && (snap.money ?? 0) >= next.price ? "#a5d6a7" : "#cfd8dc" });
+  const up = snap.upgrades || {}, act = snap.active_upgrades || {}, meta = snap.meta || {}, money = snap.money ?? 0;
+  const W = Math.min(w - 32, 980), H = Math.min(h - 80, 600), ox = (w - W) / 2, oy = 56;
+  // phòng: tường + sàn gỗ
+  ctx.fillStyle = "#d7c4a3"; ctx.fillRect(ox, oy, W, H * 0.42);
+  ctx.fillStyle = "#b98a55"; ctx.fillRect(ox, oy + H * 0.42, W, H * 0.58);
+  for (let y = oy + H * 0.42, i = 0; y < oy + H; y += 22, i++) {
+    ctx.fillStyle = i % 2 ? "#b4834e" : "#bf9160"; ctx.fillRect(ox, y, W, Math.min(22, oy + H - y));
+  }
+  ctx.strokeStyle = "#6b4a2b"; ctx.lineWidth = 4; ctx.strokeRect(ox, oy, W, H);
+  // biển hiệu
+  const sw = Math.min(460, W - 40);
+  ctx.fillStyle = "#6d4c2f"; rrect(w / 2 - sw / 2, oy + 12, sw, 50, 8); ctx.fill();
+  ctx.strokeStyle = "#3e2a14"; ctx.lineWidth = 3; ctx.stroke();
+  text("TIỆM ĐỒ LẶN CHỢ NỔI · Ngày " + (snap.day || 1), w / 2, oy + 45, { size: 22, align: "center", color: "#ffe9b0" });
+  // chủ tiệm sau quầy (tilesheet Kenney nếu có)
+  const art = sheetOk("indoor") && sheetOk("chars"), ty = oy + H * 0.42;
+  // kệ trưng bày trên tường: bình oxy và áo phao treo móc, hai bên chủ tiệm
+  const shelfY = oy + 92;
+  [[-1, iconTank], [1, iconVest]].forEach(([side, icon]) => {
+    const x0 = w / 2 + side * 120, x1 = w / 2 + side * Math.min(W / 2 - 70, 400);
+    ctx.fillStyle = "#8d6e4b"; ctx.fillRect(Math.min(x0, x1), shelfY + 62, Math.abs(x1 - x0), 8);
+    for (let k = 0, n = 4; k < n; k++) icon(x0 + (x1 - x0) * (k + 0.5) / n, shelfY + 30, 22);
   });
-  text("Cấp vừa mua có hiệu lực từ Ngày kế · Enter: đóng Shop", 34, 190, { size: 18, color: "#9fb3c0" });
+  if (art) {
+    tile("chars", 0, 10, w / 2, ty - 44, 88);
+    const n = Math.floor((W - 48) / 48), x0 = ox + (W - n * 48) / 2;
+    for (let k = 0; k < n; k++) tile("indoor", 4 + (k % 3), 12, x0 + k * 48 + 24, ty + 6, 48);
+    tile("indoor", 16, 0, ox + 40, ty - 40, 56); tile("indoor", 17, 0, ox + W - 40, ty - 40, 56);
+  } else { ctx.fillStyle = "#8d6e4b"; ctx.fillRect(ox + 20, ty - 18, W - 40, 48); }
+  text("“Mua gì thì mua lẹ nghen con!”", w / 2, ty - 98, { size: 14, align: "center", color: "#4e342e" });
+  // hai món hàng
+  const items = [["1", "oxygen", "Bình oxy", iconTank, (e) => "Oxy " + e.oxygen_max_s + " giây"],
+                 ["2", "hp", "Áo phao", iconVest, (e) => "Máu tối đa " + e.hp_max]];
+  const cw = Math.min(380, (W - 72) / 2), ch = Math.min(220, H * 0.58 - 70), cy = ty + 50;
+  items.forEach(([key, id, name, icon, eff], i) => {
+    const list = (meta.upgrades || {})[id] || [], lvl = up[id] || 0, maxL = list.length;
+    const next = list.find((e) => e.level === lvl + 1), cur = list.find((e) => e.level === lvl);
+    const can = next && money >= next.price, cx = w / 2 + (i ? 12 : -12 - cw);
+    ctx.fillStyle = can ? "#fffaf0" : "#efe6d6"; rrect(cx, cy, cw, ch, 12); ctx.fill();
+    ctx.strokeStyle = can ? "#43a047" : next ? "#9e8b6e" : "#c9a227"; ctx.lineWidth = can ? 4 : 2; ctx.stroke();
+    icon(cx + 62, cy + ch / 2 - 6, Math.min(50, ch * 0.26));
+    const tx = cx + 124;
+    text(`[${key}] ${name}`, tx, cy + 36, { size: 20, color: "#3e2723" });
+    for (let k = 0; k < maxL; k++) {  // ô cấp: đã mua / chưa
+      ctx.fillStyle = k < lvl ? "#43a047" : "rgba(0,0,0,.15)"; rrect(tx + k * 26, cy + 48, 20, 10, 3); ctx.fill();
+    }
+    text("cấp " + lvl + "/" + maxL, tx + maxL * 26 + 4, cy + 58, { size: 12, color: "#6d5a45" });
+    text("Hiện: " + (cur ? eff(cur) : "cơ bản"), tx, cy + 86, { size: 14, color: "#5d4037" });
+    if (next) {
+      text("Lên cấp " + next.level + ": " + eff(next), tx, cy + 110, { size: 14, color: "#2e7d32" });
+      coin(tx + 10, cy + ch - 34, 11);
+      text(next.price + "k", tx + 28, cy + ch - 27, { size: 20, color: can ? "#2e7d32" : "#b71c1c" });
+      text(can ? "nhấn " + key + " để mua" : "chưa đủ tiền", cx + cw - 14, cy + ch - 27, { size: 13, align: "right", color: can ? "#2e7d32" : "#8d6e63" });
+    } else text("★ ĐÃ TỐI ĐA", tx, cy + ch - 27, { size: 18, color: "#b8860b" });
+    if ((act[id] || 0) < lvl) text("có hiệu lực từ Ngày " + ((snap.day || 1) + 1), tx, cy + 132, { size: 12, color: "#1565c0" });
+  });
+  // ví tiền + đồng hồ tự đóng
+  coin(ox + 34, oy + H - 30, 13);
+  text(`${money}k`, ox + 54, oy + H - 22, { size: 22, color: "#fff8e1" });
+  text(`tổng thu ${snap.earned ?? 0}k · uy tín ${(snap.reputation ?? 0).toFixed(1)}`, ox + 54 + 90, oy + H - 23, { size: 14, color: "#fff3d6" });
+  const left = snap.time_left_ticks || 0, maxT = meta.max_ticks || 600;
+  bar(ox + W - 250, oy + H - 40, 230, 18, left / maxT, "#ffb74d", "tự đóng sau " + Math.ceil(left / 60) + "s");
+  text("Enter: đóng Shop, sang Ngày mới", w / 2, oy + H + 20, { size: 14, align: "center", color: "#9fb3c0" });
+  // thông báo mua (sự kiện gần nhất trong ~2 giây)
+  const ev = (snap.events || []).filter((e) => (e.name === "bought" || e.name === "buy_failed") && snap.tick - e.tick < 120).pop();
+  if (ev) {
+    const NAME = { oxygen: "Bình oxy", hp: "Áo phao" }, d = ev.data || {};
+    const msg = ev.name === "bought" ? `✔ Đã mua ${NAME[d.upgrade] || d.upgrade} cấp ${d.level} (−${d.price}k)`
+      : d.reason === "funds" ? "✖ Không đủ tiền" : d.reason === "max_level" ? "✖ Món này đã tối đa" : "✖ Không mua được";
+    ctx.font = "18px system-ui, sans-serif";
+    const mw = ctx.measureText(msg).width + 36;
+    ctx.fillStyle = ev.name === "bought" ? "rgba(46,125,50,.95)" : "rgba(183,28,28,.95)"; rrect(w / 2 - mw / 2, cy - 44, mw, 34, 17); ctx.fill();
+    text(msg, w / 2, cy - 21, { size: 18, align: "center", color: "#fff" });
+  }
 }
 
 // ----- Ticket-04: ba cảnh báo dễ nhận biết (chữ + biểu tượng), hiện ở cả chế độ tương phản cao -----
