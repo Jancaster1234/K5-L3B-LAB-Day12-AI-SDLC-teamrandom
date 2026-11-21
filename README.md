@@ -52,7 +52,8 @@ python3 -m chonoi.soak --seed 7 --days 10 --out soak.json
   * Bộ test kiểm chứng: `tests/test_ext_burn.py`.
 
 ## Sáng tạo của nhóm
-* **Chưa có:** Nhóm tập trung tối đa nguồn lực vào việc hoàn thiện chính xác 100% hợp đồng kỹ thuật (PRD-0, Test Contract v1.0, v1.1, v1.2), bảo đảm tính tất định và tối ưu hiệu năng/độ ổn định qua toàn bộ các Phase.
+* **Đồ họa cảnh lặn (chỉ client trình duyệt, tắt ở headless):** sprite cá/rong/đá/đáy cát/bọt khí từ Kenney Fish Pack (CC0, xem `CREDITS.md`); Út Sen đội nón lá trên mặt nước và bơi ngang có bình oxy dưới nước; Cá Sấu được vẽ (há mõm, mắt vàng khi đuổi); mặt nước gợn sóng, tia nắng.
+* **Đồ họa cảnh quán (chỉ client):** tilesheet pixel art Kenney Roguelike Indoors/Characters (CC0): bếp gang có lửa khi nấu và viền xanh khi chín, bàn ghế, quầy bếp, khách ngồi bàn với bong bóng gọi món (tên món tiếng Việt), thanh kiên nhẫn đổi màu, tô món bốc khói khi khách ăn hoặc đang bưng; Út Sen đội nón lá. `chonoi/live.py` thêm route `GET /assets/<file>` (chặn thoát thư mục, test `tests/test_live.py`). Luật, contract và output headless không đổi.
 
 > **Làm theo nhóm 4–6 người** · Dùng AI để xây game 2D qua **4 phase** trong **3 giờ**: Út Sen lặn bắt cá, hái rau trên mặt nước rồi tối mở quán phục vụ khách.
 > **Yêu cầu từng phase mở đúng mốc giờ tại lab board:** **[Chợ Nổi Lab](https://claude.ai/artifact/E35v787wSx2wDgPTNhMVDg)** (cần đăng nhập claude.ai; có trợ giảng AI cho từng phase).
