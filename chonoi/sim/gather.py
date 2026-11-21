@@ -138,44 +138,45 @@ class GatherSim:
                 best, best_d = e, d
         return best
 
-    def _hold_add(self, kind, n, events) -> int:
-        """Thêm tối đa `n` món `kind` vào CUỐI giỏ (LIFO), không vượt hold_capacity.
-        Trả số đã thêm; phát `hold_full` khi không thêm đủ `n` (giả định clarify #2: nhận một phần)."""
-        room = max(0, int(self.t["hold_capacity"]) - len(self.hold))
-        added = min(int(n), room)
-        self.hold.extend([kind] * added)
-        if added < n:
-            events.append(("hold_full", {"kind": kind}))
-        return added
+    def _hold_add(self, action, ref_key, ref_id, kind, n, events) -> bool:
+        """PRD-0 (clarify #2): nhận CẢ lượt hoặc không nhận gì. Đủ chỗ cho cả `n` thì thêm vào CUỐI giỏ
+        (LIFO) và trả True; thiếu chỗ thì phát hold_full {action, node_id|fish_id, required, free}, trả False."""
+        free = max(0, int(self.t["hold_capacity"]) - len(self.hold))
+        if n > free:
+            events.append(("hold_full", {"action": action, ref_key: ref_id, "required": n, "free": free}))
+            return False
+        self.hold.extend([kind] * n)
+        return True
 
     def _harvest(self, events):
-        """`interact` ngoài bến: chỉ ở mặt nước, hái nút `ready` gần nhất trong interact_radius."""
+        """`interact` ngoài bến: chỉ ở mặt nước, hái nút `ready` gần nhất trong interact_radius.
+        Giỏ thiếu chỗ: hold_full, nút giữ nguyên."""
         if not self._at_surface():
             return
         ready = [n for n in self.nodes if n["regrow_ticks"] == 0]
         node = self._nearest(ready, self.t["interact_radius"])
         if node is None:
             return
-        i = len(events)  # `gather` đứng TRƯỚC `hold_full` của cùng lượt
-        added = self._hold_add(node["kind"], self.t["node_yield"], events)
-        if added > 0:
+        n = int(self.t["node_yield"])
+        if self._hold_add("gather", "node_id", node["id"], node["kind"], n, events):
             node["regrow_ticks"] = int(round(self.t["regrow_s"] * TICK))
-            events.insert(i, ("gather", {"node_id": node["id"], "kind": node["kind"], "count": added}))
+            events.append(("gather", {"node_id": node["id"], "kind": node["kind"], "amount": n}))
 
     def _catch(self, events):
-        """`catch`: chỉ dưới nước và hết hồi chiêu. Mỗi lần vung đều bắt đầu hồi chiêu (kể cả hụt).
-        Bắt được thì đàn cá biến mất (cá sinh lại là việc phase sau)."""
+        """`catch`: chỉ dưới nước và hết hồi chiêu. PRD-0 (clarify #8): không có đàn trong tầm thì không
+        sự kiện, không hồi chiêu. Giỏ thiếu chỗ cho cả `yield`: hold_full, giữ đàn, không hồi chiêu.
+        Bắt được: đàn biến mất (cá sinh lại là việc phase sau) và bắt đầu hồi chiêu."""
         if self._at_surface() or self.catch_cd_ticks > 0:
             return
-        self.catch_cd_ticks = int(round(self.t["catch_cooldown_s"] * TICK))
         fish = self._nearest(self.fish, self.t["catch_radius"])
         if fish is None:
             return
-        i = len(events)
-        added = self._hold_add(fish["kind"], self.t["fish_yield"][fish["kind"]], events)
-        if added > 0:
-            self.fish.remove(fish)
-            events.insert(i, ("fish_caught", {"fish_id": fish["id"], "kind": fish["kind"], "count": added}))
+        n = int(self.t["fish_yield"][fish["kind"]])
+        if not self._hold_add("catch", "fish_id", fish["id"], fish["kind"], n, events):
+            return
+        self.fish.remove(fish)
+        self.catch_cd_ticks = int(round(self.t["catch_cooldown_s"] * TICK))
+        events.append(("fish_caught", {"fish_id": fish["id"], "kind": fish["kind"], "yield": n}))
 
     # --- lát 1: oxy, ngạt, Máu, ngất (chủ: Jancaster1234) ---------------------------
     def _update_oxygen(self, prev_d, events) -> bool:

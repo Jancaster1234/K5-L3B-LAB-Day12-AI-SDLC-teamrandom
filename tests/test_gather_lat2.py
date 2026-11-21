@@ -43,7 +43,7 @@ class Harvest(unittest.TestCase):
             rows = run(w, {"player": {"pos": [20, 0]}, "nodes": [node("N1", "bong_sung", 21)]}, [PRESS_E])
             ev = events(rows, "gather")
             self.assertEqual(len(ev), 1)
-            self.assertEqual(ev[0]["data"], {"node_id": "N1", "kind": "bong_sung", "count": G["node_yield"]})
+            self.assertEqual(ev[0]["data"], {"node_id": "N1", "kind": "bong_sung", "amount": G["node_yield"]})
             s = snapshots(rows)[-1]
             self.assertEqual(s["hold"], ["bong_sung"] * G["node_yield"])
             n1 = s["nodes"][0]
@@ -88,7 +88,8 @@ class Harvest(unittest.TestCase):
             rows = run(w, {"player": {"pos": [20, 0]}, "hold": full, "nodes": [node("N1", "bong_sung", 21)]},
                        [PRESS_E])
             self.assertEqual(events(rows, "gather"), [])
-            self.assertEqual([e["data"] for e in events(rows, "hold_full")], [{"kind": "bong_sung"}])
+            self.assertEqual([e["data"] for e in events(rows, "hold_full")],
+                             [{"action": "gather", "node_id": "N1", "required": G["node_yield"], "free": 0}])
             s = snapshots(rows)[-1]
             self.assertEqual(s["hold"], full)
             self.assertTrue(s["nodes"][0]["ready"])
@@ -114,7 +115,7 @@ class Catch(unittest.TestCase):
                            "fish": [fish("F1", "ca_linh", 31, 10), fish("F2", "ca_loc", 60, 16)]}, [PRESS_CATCH])
             ev = events(rows, "fish_caught")
             self.assertEqual([e["data"] for e in ev],
-                             [{"fish_id": "F1", "kind": "ca_linh", "count": G["fish_yield"]["ca_linh"]}])
+                             [{"fish_id": "F1", "kind": "ca_linh", "yield": G["fish_yield"]["ca_linh"]}])
             s = snapshots(rows)[-1]
             self.assertEqual(s["hold"], ["ca_linh"] * G["fish_yield"]["ca_linh"])
             self.assertEqual([f["id"] for f in s["fish"]], ["F2"])  # đàn bị bắt biến mất
@@ -144,15 +145,26 @@ class Catch(unittest.TestCase):
             self.assertEqual([e["data"]["fish_id"] for e in ev], ["F1", "F2"])
             self.assertGreaterEqual(ev[1]["tick"] - ev[0]["tick"], cd)
 
-    def test_ca_nhieu_hon_cho_trong_nhan_mot_phan(self):
+    def test_ca_nhieu_hon_cho_trong_tu_choi_ca_luot(self):
+        # PRD-0 (clarify #2): thiếu chỗ cho cả yield -> hold_full, giữ đàn, KHÔNG hồi chiêu, giỏ không đổi
         with Workdir() as w:
             hold = ["bong_sung"] * (G["hold_capacity"] - 2)
             rows = run(w, {"player": {"pos": [30, 10]}, "hold": hold, "fish": [fish("F1", "ca_linh", 30, 10)]},
                        [PRESS_CATCH])
-            names = [r["name"] for r in events(rows) if r["name"] in ("fish_caught", "hold_full")]
-            self.assertEqual(names, ["fish_caught", "hold_full"])
-            self.assertEqual(events(rows, "fish_caught")[0]["data"]["count"], 2)
-            self.assertEqual(snapshots(rows)[-1]["hold"], hold + ["ca_linh", "ca_linh"])
+            self.assertEqual(events(rows, "fish_caught"), [])
+            self.assertEqual([e["data"] for e in events(rows, "hold_full")],
+                             [{"action": "catch", "fish_id": "F1", "required": G["fish_yield"]["ca_linh"], "free": 2}])
+            s = snapshots(rows)[-1]
+            self.assertEqual(s["hold"], hold)
+            self.assertEqual([f["id"] for f in s["fish"]], ["F1"])
+            self.assertEqual(s["player"]["catch_cd_ticks"], 0)
+
+    def test_vung_hut_khong_hoi_chieu(self):
+        # PRD-0 (clarify #8): không có đàn trong tầm -> không sự kiện, không hồi chiêu
+        with Workdir() as w:
+            rows = run(w, {"player": {"pos": [30, 10]}, "fish": []}, [PRESS_CATCH])
+            self.assertEqual([r for r in events(rows) if r["name"] not in ("dive", "surface")], [])
+            self.assertEqual(snapshots(rows)[-1]["player"]["catch_cd_ticks"], 0)
 
     def test_gio_day_ca_o_lai(self):
         with Workdir() as w:

@@ -1,6 +1,6 @@
 # Hợp đồng tích hợp — Phase 1 (contract v1.0)
 
-> Người giữ: Integrator (Jancaster1234) · Đã đối chiếu PRD-0 (PO HaiVuQ, `docs/clarify.md` #1–#10); **⚠** = code chưa khớp PRD-0. PRD-0 thắng nếu khác. Đổi mục nào thì báo cả nhóm trên Discord và ghi lý do (ADR ở `docs/adr/`).
+> Người giữ: Integrator (Jancaster1234) · Đã đối chiếu PRD-0 (PO HaiVuQ, `docs/clarify.md` #1–#10); code đã khớp PRD-0 ở mọi mục (giả định còn lại: clarify #11). PRD-0 thắng nếu khác. Đổi mục nào thì báo cả nhóm trên Discord và ghi lý do (ADR ở `docs/adr/`).
 > Số liệu luôn đọc từ `game.contract.json` (`tuning.*`), không hard-code.
 
 ## 1. File kho (PRD-0 mục G) — đã cố định bởi `chonoi/inventory.py`
@@ -28,7 +28,7 @@ Mỗi lát chỉ thêm **một dòng gọi** vào `step()`; logic nằm trong h�
 | 5 | `catch` | `_catch(events)` | lát 2 · ndhai255 |
 | 6 | Hết giờ → `_finish("time")` | có sẵn | khung |
 
-Giỏ (`self.hold`): mảng id theo thứ tự nhặt, **cuối mảng = mới nhất** (LIFO). Chỉ thêm qua `_hold_add(kind, n, events) -> int` (lát 2 viết): PRD-0 (clarify #2): **nhận cả lượt hoặc không nhận gì** — thiếu chỗ thì phát `hold_full`, nút giữ nguyên, đàn cá ở lại và không đặt hồi chiêu; `catch` hụt không sự kiện, không hồi chiêu (clarify #8). ⚠ code lát 2 còn nhận một phần.
+Giỏ (`self.hold`): mảng id theo thứ tự nhặt, **cuối mảng = mới nhất** (LIFO). Chỉ thêm qua `_hold_add(kind, n, events) -> int` (lát 2 viết): PRD-0 (clarify #2): **nhận cả lượt hoặc không nhận gì** — thiếu chỗ thì phát `hold_full`, nút giữ nguyên, đàn cá ở lại và không đặt hồi chiêu; `catch` hụt không sự kiện, không hồi chiêu (clarify #8).
 
 ### `chonoi/sim/quan.py` — theo PRD-0 mục F (clarify #3)
 | # | Bước | Hàm | Chủ |
@@ -81,10 +81,10 @@ Dòng JSONL: `{"type":"event","tick","phase","name","data"}`; phát theo đúng 
 | `oxygen_empty` | lát 1 | `{oxygen_ticks: 0}` ✅ |
 | `choke` | lát 1 | `{hp}` ✅ |
 | `faint` | lát 1 | `{cause: "choke", lost: [kind theo LIFO], hp: 0}` ✅, theo sau là `gather_end` `fainted` |
-| `gather` | lát 2 | `{node_id, kind, amount}` (⚠ code lát 2 còn `count`) |
+| `gather` | lát 2 | `{node_id, kind, amount}` ✅ |
 | `node_regrown` | khung | `{node_id}` ✅ |
-| `fish_caught` | lát 2 | `{fish_id, kind, yield}` (⚠ code lát 2 còn `count`) |
-| `hold_full` | lát 2 | `{action: "gather"\|"catch", node_id\|fish_id, required, free}` (⚠ code lát 2 còn `{kind}`) |
+| `fish_caught` | lát 2 | `{fish_id, kind, yield}` ✅ |
+| `hold_full` | lát 2 | `{action: "gather"\|"catch", node_id\|fish_id, required, free}` ✅ |
 | `gather_end` | khung | `{reason, inventory:{items}}` ✅ |
 | `customer_arrived` | lát 3 | `{order_id, table_id, dish_id}` ✅ |
 | `no_dish` | lát 3 | `{}` ✅ |
